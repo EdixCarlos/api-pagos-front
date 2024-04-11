@@ -22,20 +22,20 @@ const formSchema = z
   .object({
     email: z
       .string()
-      .min(1, { message: 'Please enter your email' })
-      .email({ message: 'Invalid email address' }),
+      .min(1, { message: 'Por favor ingrese su correo' })
+      .email({ message: 'Correo invalido' }),
     password: z
       .string()
       .min(1, {
-        message: 'Please enter your password',
+        message: 'Por favor ingrese su contraseña',
       })
       .min(7, {
-        message: 'Password must be at least 7 characters long',
+        message: 'Su contraseña debe tener al menos 7 caracteres',
       }),
     confirmPassword: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match.",
+    message: "La contraseña no coincide",
     path: ['confirmPassword'],
   })
 

@@ -1,15 +1,16 @@
 import { config } from '@/lib/config.ts'
 
 const API_BASE_URL = config.apiUrl;
-export const createSede = async (sede) => {
+
+export const createEgreso = async (egreso) => {
   const token = localStorage.getItem('authToken');
-  const response = await fetch(`${API_BASE_URL}/sedes/`, {
+  const response = await fetch(`${API_BASE_URL}/egreso/`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify(sede),
+    body: JSON.stringify(egreso),
   });
 
   if (!response.ok) {
@@ -19,15 +20,15 @@ export const createSede = async (sede) => {
   return response.json();
 };
 
-export const updateSede = async (sede) => {
+export const updateEgreso = async (egreso) => {
   const token = localStorage.getItem('authToken');
-  const response = await fetch(`${API_BASE_URL}/sedes`, {
+  const response = await fetch(`${API_BASE_URL}/egreso`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify(sede),
+    body: JSON.stringify(egreso),
   });
 
   if (!response.ok) {
@@ -35,12 +36,11 @@ export const updateSede = async (sede) => {
   }
 
   return response.json();
-
 }
 
-export const deleteSede = async (id) => {
+export const deleteEgreso = async (id) => {
   const token = localStorage.getItem('authToken');
-  const response = await fetch(`${API_BASE_URL}/sedes/${id}`, {
+  const response = await fetch(`${API_BASE_URL}/egreso/${id}`, {
     method: 'DELETE',
     headers: {
       'Content-Type': 'application/json',
@@ -53,12 +53,11 @@ export const deleteSede = async (id) => {
   }
 
   return response.json();
-
 }
 
-export const getSedes = async () => {
+export const getEgresos = async () => {
   const token = localStorage.getItem('authToken');
-  const response = await fetch(`${API_BASE_URL}/sedes/?page=0&size=100000`, {
+  const response = await fetch(`${API_BASE_URL}/egreso`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -71,4 +70,4 @@ export const getSedes = async () => {
   }
 
   return response.json();
-};
+}

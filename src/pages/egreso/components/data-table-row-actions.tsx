@@ -6,33 +6,31 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuShortcut,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 
 import React, { useState } from 'react'
+import { deleteDeuda } from '@/services/deudasService.ts'
 import { useToast } from '@/components/ui/use-toast.ts'
-import { matriculaContext } from '@/context/matriculaContext.tsx'
-import { matriculaSchema } from '@/domain/matriculaSchema.ts'
-import { deleteMatricula } from '@/services/matriculasService.ts'
-import { EditMatriculaDialog } from '@/pages/matricula/components/EditMatriculaDialog.tsx'
-import { jsPDF } from "jspdf";
-import "jspdf-autotable";
-import autoTable from 'jspdf-autotable'
+import { EditPagoDialog } from '@/pages/pago/components/EditPagoDialog.tsx'
+import { pagoContext } from '@/context/pagoContext.tsx'
+import { pagoSchema } from '@/domain/pagoSchema.ts'
+import { deletePagos } from '@/services/pagoService.ts'
+import { EditEgresoDialog } from '@/pages/egreso/components/EditEgresoDialog.tsx'
+import { egresoContext } from '@/context/egresoContext.tsx'
+import { egresoSchema } from '@/domain/egresoSchema.ts'
+import { deleteEgreso } from '@/services/egresoService.ts'
 interface IData {
   id: number;
   // otras propiedades...
 }
-type DataType = {
-  coin: string;
-  game_group: string;
-  game_name: string;
-  game_version: string;
-  machine: string;
-  vlt: string;
-  id?: string;
-};
 interface DataTableRowActionsProps<TData extends IData> {
   row: Row<TData>;
 }
@@ -40,60 +38,29 @@ interface DataTableRowActionsProps<TData extends IData> {
 export function DataTableRowActions<TData extends IData>({
   row,
 }: DataTableRowActionsProps<TData>) {
-  const { fetchMatricula } = React.useContext(matriculaContext);
+  const { fetchEgreso } = React.useContext(egresoContext);
 
   const toast = useToast()
 
-  const matricula = matriculaSchema.parse(row.original)
+  const egreso = egresoSchema.parse(row.original)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const handleDelete = async () => {
     try {
-      await deleteMatricula(row.original.id);
+      await deleteEgreso(row.original.id);
       toast.toast({
         variant: 'success',
         title: 'Éxito',
-        description: 'La matricula se ha eliminado correctamente.',
+        description: 'El egreso se ha eliminado correctamente.',
       })
     } catch (error) {
       toast.toast({
         variant: 'error',
         title: 'Error',
-        description: 'Hubo un error al eliminar la matricula.',
+        description: 'Hubo un error al eliminar el egreso.',
       })
-      console.error('Error deleting matricula:', error);
     }
-    fetchMatricula()
+    fetchEgreso()
   };
-  const imgData = 'data:image/png;base64,'
-  const handlerExportPDF = () => {
-    const doc = new jsPDF();
-
-    doc.setFontSize(22);
-    doc.text("Reporte", 14, 22);
-
-    doc.setFontSize(16);
-    doc.text("Descripcion", 14, 30);
-
-    doc.addImage(imgData, "JPEG", 15, 40, 18, 18);
-
-    const data = [
-      ['Dato1', 'Dato2', 'Dato3'],
-    ];
-    const headers = [['Columna1', 'Columna2', 'Columna3']];
-
-    autoTable(doc, {
-      head: headers,
-      body: data,
-      startY: 60,
-    });
-
-    doc.autoPrint();
-    doc.save("document.pdf");
-  };
-
-  const handlerDetalles = () => {
-    console.log('Detalles');
-  }
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -109,23 +76,32 @@ export function DataTableRowActions<TData extends IData>({
         <DropdownMenuItem onClick={() => setIsEditDialogOpen(true)}>Editar
           <DropdownMenuShortcut>Shift+P</DropdownMenuShortcut>
         </DropdownMenuItem>
+        {/*<DropdownMenuItem>Make a copy</DropdownMenuItem>*/}
+        {/*<DropdownMenuItem>Favorite</DropdownMenuItem>*/}
+        {/*<DropdownMenuSeparator />*/}
+        {/*<DropdownMenuSub>*/}
+        {/*  <DropdownMenuSubTrigger>Labels</DropdownMenuSubTrigger>*/}
+        {/*  <DropdownMenuSubContent>*/}
+        {/*    <DropdownMenuRadioGroup value={deuda.alumno.nombres}>*/}
+        {/*      {labels.map((label) => (*/}
+        {/*        <DropdownMenuRadioItem key={label.value} value={label.value}>*/}
+        {/*          {label.label}*/}
+        {/*        </DropdownMenuRadioItem>*/}
+        {/*      ))}*/}
+        {/*    </DropdownMenuRadioGroup>*/}
+        {/*  </DropdownMenuSubContent>*/}
+        {/*</DropdownMenuSub>*/}
+        <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleDelete}>
           Eliminar
           <DropdownMenuShortcut>⌘⌫</DropdownMenuShortcut>
         </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handlerExportPDF}>
-          Imprimir PDF
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={handlerDetalles}>
-          Detalless
-        </DropdownMenuItem>
       </DropdownMenuContent>
       {isEditDialogOpen && (
-        <EditMatriculaDialog
+        <EditEgresoDialog
           isOpen={isEditDialogOpen}
           setIsOpen={setIsEditDialogOpen}
-          matricula={matricula}
+          pago={egreso}
         />
       )}
     </DropdownMenu>

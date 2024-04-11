@@ -63,7 +63,7 @@ export const EditSemestreDialog = ({ isOpen, setIsOpen, semestre }) => {
       const response = await getCarreras();
       const options = response.content.map(carrera => ({
         value: carrera.id,
-        label: carrera.nombre,
+        label: carrera.nombre + ' sede: ' + carrera.sede.nombre,
       }));
       setCarrerasOptions(options);
     };
@@ -249,7 +249,7 @@ export const EditSemestreDialog = ({ isOpen, setIsOpen, semestre }) => {
           )} />
           <FormField name="carrera" render={({ field }) => (
             <>
-              <FormLabel>Tipo de Deuda</FormLabel>
+              <FormLabel>Carrera</FormLabel>
               <FormControl>
                 <Popover>
                   <PopoverTrigger asChild>

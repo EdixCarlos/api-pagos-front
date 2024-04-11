@@ -9,16 +9,16 @@ import {
   IconHexagonNumber1,
   IconHexagonNumber2,
   IconHexagonNumber3,
-  IconHexagonNumber4,
+  IconClipboardData ,
   IconLayoutDashboard,
-  IconMessages,
-  IconRouteAltLeft,
-  IconServerOff,
-  IconSettings,
-  IconTruck,
-  IconUserShield,
+  IconAB2 ,
+  IconVersions ,
+  IconBuildingEstate ,
+  IconCash,
+  IconClock2 ,
+  IconAddressBook ,
   IconUsers,
-  IconSchool
+  IconSchool, IconPercentage,
 } from '@tabler/icons-react'
 
 export interface NavLink {
@@ -27,7 +27,6 @@ export interface NavLink {
   href: string
   icon: JSX.Element
 }
-
 export interface SideLink extends NavLink {
   sub?: NavLink[]
 }
@@ -55,73 +54,79 @@ export const sidelinks: SideLink[] = [
     title: 'Deudas',
     label: '',
     href: '/deudas',
-    icon: <IconSchool  size={18} />,
+    icon: <IconPercentage  size={18} />,
   },
   {
     title: 'Carreras',
     label: '',
     href: '/carreras',
-    icon: <IconSchool  size={18} />,
+    icon: <IconAddressBook  size={18} />,
   },
   {
     title: 'Forma Pago',
     label: '',
     href: '/forma-pago',
-    icon: <IconSchool  size={18} />,
+    icon: <IconCash  size={18} />,
   },
   {
     title: 'Horarios',
     label: '',
     href: '/horarios',
-    icon: <IconSchool  size={18} />,
+    icon: <IconClock2  size={18} />,
   },
   {
     title: 'Modalidades',
     label: '',
     href: '/modalidades',
-    icon: <IconSchool  size={18} />,
+    icon: <IconVersions   size={18} />,
   },
   {
     title: 'Pagos',
     label: '',
     href: '/pagos',
-    icon: <IconSchool  size={18} />,
+    icon: <IconCash  size={18} />,
+  },
+  {
+    title: 'Egresos',
+    label: '',
+    href: '/egresos',
+    icon: <IconCash  size={18} />,
   },
   {
     title: 'Sedes',
     label: '9',
     href: '/sedes',
-    icon: <IconSchool  size={18} />,
+    icon: <IconBuildingEstate   size={18} />,
   },
   {
     title: 'Semestres',
     label: '',
     href: '/semestres',
-    icon: <IconSchool  size={18} />,
+    icon: <IconAB2   size={18} />,
   },
   {
     title: 'Tipo Deuda',
     label: '9',
     href: '/tipo-deuda',
-    icon: <IconSchool  size={18} />,
+    icon: <IconPercentage  size={18} />,
   },
   {
     title: 'Tipo Pago',
     label: '9',
     href: '/tipo-pago',
-    icon: <IconSchool  size={18} />,
+    icon: <IconCash  size={18} />,
   },
   {
     title: 'Matriculas',
     label: '9',
     href: '/matriculas',
-    icon: <IconSchool  size={18} />,
+    icon: <IconClipboardData   size={18} />,
   },
   {
     title: 'Usuarios',
     label: '9',
     href: '/users',
-    icon: <IconSchool  size={18} />,
+    icon: <IconUsers  size={18} />,
   },
   // {
   //   title: 'Authentication',

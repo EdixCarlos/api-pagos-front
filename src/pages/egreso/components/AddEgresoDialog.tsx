@@ -1,4 +1,3 @@
-// AddAlumnoDialog.tsx
 import { useForm } from 'react-hook-form'
 import {
   Dialog,
@@ -11,39 +10,59 @@ import {
 import { Button } from '@/components/custom/button.tsx'
 import { Form, FormField, FormControl, FormLabel, FormDescription, FormMessage } from '@/components/ui/form.tsx'
 import { Input } from '@/components/ui/input.tsx'
-import { PlusIcon, EnterIcon, CaretSortIcon, CheckIcon } from '@radix-ui/react-icons'
+import { PlusIcon, EnterIcon, CaretSortIcon, CheckIcon, QuestionMarkCircledIcon } from '@radix-ui/react-icons'
 import { useToast } from '@/components/ui/use-toast.ts'
 import React, { useContext, useEffect, useState } from 'react'
-import { createAlumno, getAlumnos } from '@/services/alumnosService.ts'
 import { Popover, PopoverContent } from '@/components/ui/popover.tsx'
 import { PopoverTrigger } from '@radix-ui/react-popover'
 import { cn } from '@/lib/utils.ts'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command.tsx'
+import { getUsuarios } from '@/services/usuariosService.ts'
+import { getFormasPago } from '@/services/formaPagoService.ts'
 import { getSedes } from '@/services/sedeService.ts'
-import { alumnosContext } from '@/context/alumnosContext.tsx'
-import { estadoAlumnos, sexos } from '@/pages/alumnos/data/data.tsx'
-import MaskedInput from 'react-text-mask';
-
+import { egresoContext } from '@/context/egresoContext.tsx'
+import { createEgreso } from '@/services/egresoService.ts'
 interface Option {
   value: number;
   label: string;
 }
-export const AddAlumnoDialog = ({ isOpen, setIsOpen }) => {
-  const { fetchAlumnos } = useContext(alumnosContext);
-  const [tipoDeudaOptions, setTipoDeudaOptions] = useState<Option[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
+export const AddEgresoDialog = ({ isOpen, setIsOpen }) => {
+  const { fetchEgreso } = useContext(egresoContext);
   const methods = useForm()
-
+  const [userOptions, setUserOptions] = useState<Option[]>([]);
+  const [formaPagoOptions, setFormaPagoOptions] = useState<Option[]>([]);
   const [sedeOptions, setSedeOptions] = useState<Option[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+
   useEffect(() => {
+    const fetchUser = async () => {
+      const response = await getUsuarios();
+      const options = response.map(user => ({
+        value: user.id,
+        label: user.name,
+      }));
+      setUserOptions(options);
+    };
+    const fetchFormaPago = async () => {
+      const response = await getFormasPago();
+      const options = response.content.map(formaPago => ({
+        value: formaPago.id,
+        label: formaPago.name,
+      }));
+      setFormaPagoOptions(options);
+    };
     const fetchSedes = async () => {
       const response = await getSedes();
-      const options = response.content.map(data => ({
-        value: data.id,
-        label: data.nombre,
+      console.log(response.content)
+      const options = response.content.map(sedes => ({
+        value: sedes.nombre,
+        label: sedes.nombre,
+        icon: QuestionMarkCircledIcon,
       }));
       setSedeOptions(options);
     };
+    fetchFormaPago();
+    fetchUser();
     fetchSedes();
   }, []);
 
@@ -51,57 +70,35 @@ export const AddAlumnoDialog = ({ isOpen, setIsOpen }) => {
   const closeDialog = () => setIsOpen(false)
   const handleAdd = async () => {
     try {
-      const alumno = methods.getValues()
-      const addAlumno = {
-        codigo: alumno.codigo,
-        apellidos: alumno.apellidos,
-        nombres: alumno.nombres,
-        sexo: alumno.sexo,
-        fechaNacimiento: alumno.fechaNacimiento,
-        celular: alumno.celular,
-        telefono: alumno.telefono,
-        dni: alumno.dni,
-        direccion: alumno.direccion,
-        distrito: alumno.distrito,
-        provincia: alumno.provincia,
-        departamento: alumno.departamento,
-        sedeId: alumno.sede,
-        estado: alumno.estado,
+      const egreso = methods.getValues()
+      const addEgreso = {
+        numRecibo: egreso.numRecibo,
+        cantidad: egreso.cantidad,
+        concepto: egreso.concepto,
+        fechaPago: egreso.fechaPago,
+        userId: egreso.user,
+        formaPagoId: egreso.formaPago,
+        sedeId: egreso.sede,
       }
-      await createAlumno(addAlumno)
+      await createEgreso(addEgreso)
       toast.toast({
         variant: 'success',
         title: 'Éxito',
-        description: 'El alumno se ha añadido correctamente.'
+        description: 'El egreso se ha añadido correctamente.'
       })
-      fetchAlumnos()
+      fetchEgreso()
       closeDialog()
       methods.reset()
     } catch (error) {
       toast.toast({
         variant: 'error',
         title: 'Error',
-        description: 'Hubo un error al añadir el alumno.'
+        description: 'Hubo un error al añadir el egreso.'
       })
     }
     methods.reset()
   }
-  const [fechaNacimiento, setFechaNacimiento] = useState("yyyy-mm-dd");
 
-  const handleInputChange = (e) => {
-    const value = e.target.value;
-    let placeholder = "yyyy-mm-dd";
-
-    if (value.length === 4) {
-      placeholder = value + "-mm-dd";
-    } else if (value.length === 7) {
-      placeholder = value + "-dd";
-    } else if (value.length > 7) {
-      placeholder = value;
-    }
-
-    setFechaNacimiento(placeholder);
-  };
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
@@ -115,35 +112,43 @@ export const AddAlumnoDialog = ({ isOpen, setIsOpen }) => {
         </Button>
       </DialogTrigger>
       <DialogContent className="overflow-auto max-h-screen">
-        <DialogTitle>Agregar Alumno</DialogTitle>
+        <DialogTitle>Agregar Egreso</DialogTitle>
         <Form {...methods}>
-          <FormField name="codigo" render={({ field }) => (
+          <FormField name="numRecibo" render={({ field }) => (
             <>
-              <FormLabel>Codigo</FormLabel>
+              <FormLabel>Numero recibo</FormLabel>
               <FormControl>
-                <Input {...field} placeholder="Ingresa el codigo" />
+                <Input {...field} placeholder="Ingresa el numero del recibo" />
               </FormControl>
             </>
           )} />
-          <FormField name="apellidos" render={({ field }) => (
+          <FormField name="cantidad" render={({ field }) => (
             <>
-              <FormLabel>Apellidos</FormLabel>
+              <FormLabel>Cantidad</FormLabel>
               <FormControl>
-                <Input {...field} placeholder="Ingresa los apellidos" />
+                <Input {...field} placeholder="Ingresa la cantidad del pago" />
               </FormControl>
             </>
           )} />
-          <FormField name="nombres" render={({ field }) => (
+          <FormField name="concepto" render={({ field }) => (
             <>
-              <FormLabel>Nombres</FormLabel>
+              <FormLabel>Concepto</FormLabel>
               <FormControl>
-                <Input {...field} placeholder="Ingresa los nombres" />
+                <Input {...field} placeholder="Ingresa el concepto" />
               </FormControl>
             </>
           )} />
-          <FormField name="sexo" render={({ field }) => (
+          <FormField name="fechaPago" render={({ field }) => (
             <>
-              <FormLabel>sexo</FormLabel>
+              <FormLabel>Fecha de pago</FormLabel>
+              <FormControl>
+                <Input {...field} placeholder="Ingresa la fecha de pago" />
+              </FormControl>
+            </>
+          )} />
+          <FormField name="user" render={({ field }) => (
+            <>
+              <FormLabel>Usuario</FormLabel>
               <FormControl>
                 <Popover>
                   <PopoverTrigger asChild>
@@ -152,15 +157,14 @@ export const AddAlumnoDialog = ({ isOpen, setIsOpen }) => {
                       role='combobox'
                       className={cn(
                         'w-auto justify-between',
-
                         !field.value && 'text-muted-foreground'
                       )}
                     >
                       {field.value
-                        ? sexos.find(
+                        ? userOptions.find(
                           (option) => option.value === field.value
                         )?.label
-                        : 'Select usuario'}
+                        : 'Seleciona el usuario'}
                       <CaretSortIcon className='ml-2 h-4 w-4 shrink-0 opacity-50' />
                     </Button>
                   </PopoverTrigger>
@@ -169,12 +173,12 @@ export const AddAlumnoDialog = ({ isOpen, setIsOpen }) => {
                       <CommandInput placeholder='Search...' onValueChange={setSearchTerm} />
                       <CommandEmpty>No options found.</CommandEmpty>
                       <CommandGroup>
-                        {sexos.map((option) => (
+                        {userOptions.map((option) => (
                           <CommandItem
                             value={option.label}
                             key={option.value}
                             onSelect={() => {
-                              methods.setValue('sexo', option.value);
+                              methods.setValue('user', option.value);
                             }}
                           >
                             <CheckIcon
@@ -195,73 +199,57 @@ export const AddAlumnoDialog = ({ isOpen, setIsOpen }) => {
               </FormControl>
             </>
           )} />
-          <FormField name="fechaNacimiento" render={({ field }) => (
+          <FormField name="formaPago" render={({ field }) => (
             <>
-              <FormLabel>Fecha nacimiento</FormLabel>
+              <FormLabel>Forma de Pago</FormLabel>
               <FormControl>
-                <MaskedInput
-                  mask={[/\d/, /\d/, /\d/, /\d/, '-', /\d/, /\d/, '-', /\d/, /\d/]}
-                  guide={false}
-                  placeholder="yyyy-mm-dd"
-                  {...field}
-                  render={(ref, props) => <Input ref={ref} {...props} />}
-                />
-              </FormControl>
-            </>
-          )} />
-          <FormField name="celular" render={({ field }) => (
-            <>
-              <FormLabel>Celular</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="Ingresa el celular" />
-              </FormControl>
-            </>
-          )} />
-          <FormField name="telefono" render={({ field }) => (
-            <>
-              <FormLabel>Telefono</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="Ingresa el telefono" />
-              </FormControl>
-            </>
-          )} />
-          <FormField name="dni" render={({ field }) => (
-            <>
-              <FormLabel>DNI</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="Ingresa el DNI" />
-              </FormControl>
-            </>
-          )} />
-          <FormField name="direccion" render={({ field }) => (
-            <>
-              <FormLabel>Direccion</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="Ingresa la direccion" />
-              </FormControl>
-            </>
-          )} />
-          <FormField name="distrito" render={({ field }) => (
-            <>
-              <FormLabel>Distrito</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="Ingresa el distrito" />
-              </FormControl>
-            </>
-          )} />
-          <FormField name="provincia" render={({ field }) => (
-            <>
-              <FormLabel>Provincia</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="Ingresa la fecha del último pago" />
-              </FormControl>
-            </>
-          )} />
-          <FormField name="departamento" rules={{ required: true }} render={({ field }) => (
-            <>
-              <FormLabel>Departamento</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="Ingresa el departamento" />
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant='outline'
+                      role='combobox'
+                      className={cn(
+                        'w-auto justify-between',
+
+                        !field.value && 'text-muted-foreground'
+                      )}
+                    >
+                      {field.value
+                        ? formaPagoOptions.find(
+                          (option) => option.value === field.value
+                        )?.label
+                        : 'Selecciona la forma de pago'}
+                      <CaretSortIcon className='ml-2 h-4 w-4 shrink-0 opacity-50' />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className='w-auto p-0'>
+                    <Command>
+                      <CommandInput placeholder='Search...' onValueChange={setSearchTerm} />
+                      <CommandEmpty>No options found.</CommandEmpty>
+                      <CommandGroup>
+                        {formaPagoOptions.map((option) => (
+                          <CommandItem
+                            value={option.label}
+                            key={option.value}
+                            onSelect={() => {
+                              methods.setValue('formaPago', option.value);
+                            }}
+                          >
+                            <CheckIcon
+                              className={cn(
+                                'mr-2 h-4 w-4',
+                                option.value === field.value
+                                  ? 'opacity-100'
+                                  : 'opacity-0'
+                              )}
+                            />
+                            {option.label}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
               </FormControl>
             </>
           )} />
@@ -318,61 +306,6 @@ export const AddAlumnoDialog = ({ isOpen, setIsOpen }) => {
               </FormControl>
             </>
           )} />
-          <FormField name="estado" render={({ field }) => (
-            <>
-              <FormLabel>Estado</FormLabel>
-              <FormControl>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant='outline'
-                      role='combobox'
-                      className={cn(
-                        'w-auto justify-between',
-
-                        !field.value && 'text-muted-foreground'
-                      )}
-                    >
-                      {field.value
-                        ? estadoAlumnos.find(
-                          (option) => option.value === field.value
-                        )?.label
-                        : 'Select estado'}
-                      <CaretSortIcon className='ml-2 h-4 w-4 shrink-0 opacity-50' />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className='w-auto p-0'>
-                    <Command>
-                      <CommandInput placeholder='Search...' onValueChange={setSearchTerm} />
-                      <CommandEmpty>No options found.</CommandEmpty>
-                      <CommandGroup>
-                        {estadoAlumnos.map((option) => (
-                          <CommandItem
-                            value={option.label}
-                            key={option.value}
-                            onSelect={() => {
-                              methods.setValue('estado', option.value);
-                            }}
-                          >
-                            <CheckIcon
-                              className={cn(
-                                'mr-2 h-4 w-4',
-                                option.value === field.value
-                                  ? 'opacity-100'
-                                  : 'opacity-0'
-                              )}
-                            />
-                            {option.label}
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-              </FormControl>
-            </>
-          )} />
-
         </Form>
         <DialogFooter>
           <Button onClick={() => handleAdd()} variant="outline"

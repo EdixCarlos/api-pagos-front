@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { IconChartArrows, IconChevronsLeft, IconMenu2, IconX, IconSchool, IconAppWindow  } from '@tabler/icons-react'
+import { IconChartArrows, IconChevronsLeft, IconMenu2, IconX,IconPercentage  } from '@tabler/icons-react'
 import { Layout, LayoutHeader } from './custom/layout'
 import { Button } from './custom/button'
 import Nav from './nav'
@@ -53,8 +53,9 @@ export default function Sidebar2({
               width={30}
               height={30}
               viewBox="0 0 1563 1528"
+              className="text-current fill-current"
             >
-              <g fill="#FFF">
+              <g>
                 <path
                   d="M674 68.1c-18.5 1.5-43.1 7.9-59.8 15.5-42.4 19.3-74.7 59.3-84.4 104.7-2.9 13.6-3.1 39.7-.4 53.2 13.2 66.2 66.2 115.1 133.9 123.5 14.1 1.8 41.3.8 55.1-1.9 57.2-11.5 103.8-51.9 119.4-103.6 5.2-17 5.7-20.7 5.7-42 0-15.7-.4-21.8-1.9-28.4-7.2-33-24.8-62.1-50.9-84-26-21.8-55.6-34.1-89.8-37.1-12.5-1.1-13.1-1.1-26.9.1" />
                 <path

@@ -97,6 +97,12 @@ const App = () => {
           }),
         },
         {
+          path: 'egresos',
+          lazy: async () => ({
+            Component: (await import('@/pages/egreso/index')).default,
+          }),
+        },
+        {
           path: 'sedes',
           lazy: async () => ({
             Component: (await import('@/pages/sede/index')).default,
