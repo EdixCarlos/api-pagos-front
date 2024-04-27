@@ -7,6 +7,8 @@ import { useEffect, useState } from 'react'
 import { columnsEgresos } from '@/pages/egreso/components/columnsEgresos.tsx'
 import { egresoContext } from '@/context/egresoContext.tsx'
 import { getEgresos } from '@/services/egresoService.ts'
+import { FastFormAlumnos } from '@/components/fastFormAlumnos.tsx'
+import { FastFormPagos } from '@/components/fastFormPagos.tsx'
 export default function Tasks() {
 const [egresosData, setEgresosData] = useState([]); // Initialize with an empty array
   const fetchEgreso = async () => {
@@ -31,6 +33,8 @@ const [egresosData, setEgresosData] = useState([]); // Initialize with an empty 
     <Layout>
       {/* ===== Top Heading ===== */}
       <LayoutHeader>
+        <FastFormAlumnos />
+        <FastFormPagos />
         <div className='ml-auto flex items-center space-x-4'>
           <ThemeSwitch />
           <UserNav />

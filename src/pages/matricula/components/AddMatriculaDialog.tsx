@@ -38,6 +38,10 @@ export const AddMatriculaDialog = ({ isOpen, setIsOpen }) => {
   const [userOptions, setUserOptions] = useState<Option[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   useEffect(() => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    methods.setValue('user', user.id);
+  }, [methods]);
+  useEffect(() => {
     const fetchUser = async () => {
       const response = await getUsuarios();
       const options = response.map(user => ({
@@ -117,7 +121,7 @@ export const AddMatriculaDialog = ({ isOpen, setIsOpen }) => {
         </Button>
       </DialogTrigger>
       <DialogContent className="overflow-auto max-h-screen">
-        <DialogTitle>Agregar Deuda</DialogTitle>
+        <DialogTitle>Agregar Matricula</DialogTitle>
         <Form {...methods}>
           <FormField name="alumno" render={({ field }) => (
             <>

@@ -58,6 +58,23 @@ export function DataTableRowActions<TData extends IData>({
     }
     fetchPago()
   };
+  const handleReportPDF = async () => {
+    try {
+      // await deleteDeuda(row.original.id);
+      toast.toast({
+        variant: 'success',
+        title: 'Éxito',
+        description: 'Se genero el reporte pdf correctamente.',
+      })
+    } catch (error) {
+      toast.toast({
+        variant: 'error',
+        title: 'Error',
+        description: 'Hubo un error al generar el reporte.',
+      })
+    }
+    fetchPago()
+  }
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -71,8 +88,12 @@ export function DataTableRowActions<TData extends IData>({
       </DropdownMenuTrigger>
       <DropdownMenuContent align='end' className='w-[160px]'>
         <DropdownMenuItem onClick={() => setIsEditDialogOpen(true)}>Editar
-          <DropdownMenuShortcut>Shift+P</DropdownMenuShortcut>
+          {/*<DropdownMenuShortcut>Shift+P</DropdownMenuShortcut>*/}
         </DropdownMenuItem>
+        {/*<DropdownMenuSeparator />*/}
+        {/*<DropdownMenuItem onClick={() => handleReportPDF()}>Reporte PDF*/}
+        {/*  /!*<DropdownMenuShortcut>Shift+T</DropdownMenuShortcut>*!/*/}
+        {/*</DropdownMenuItem>*/}
         {/*<DropdownMenuItem>Make a copy</DropdownMenuItem>*/}
         {/*<DropdownMenuItem>Favorite</DropdownMenuItem>*/}
         {/*<DropdownMenuSeparator />*/}

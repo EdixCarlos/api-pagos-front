@@ -25,17 +25,26 @@ import { createSede } from '@/services/sedeService.ts'
 import { createSemestre } from '@/services/semestresService.ts'
 import { estadoDeudas } from '@/pages/deudas/data/data.tsx'
 import { estadoSemestres } from '@/pages/semestres/data/data.tsx'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod';
+
 interface Option {
   value: number;
   label: string;
 }
+const formSchema = z.object({
+  mensualidades: z.number().min(1, 'Debe ser al menos 1').max(12, 'No puede ser mayor que 12'),
+});
+
 export const AddSemestreDialog = ({ isOpen, setIsOpen }) => {
   const { fetchSemestre } = useContext(semestreContext);
   const methods = useForm()
   const [searchTerm, setSearchTerm] = useState('');
   const [modalidadesOptions, setModalidadesOptions] = useState<Option[]>([]);
   const [carrerasOptions, setCarrerasOptions] = useState<Option[]>([]);
-
+  const form = useForm({
+    resolver: zodResolver(formSchema),
+  });
   useEffect(() => {
     const fetchModalidades = async () => {
       const response = await getModalidades();
@@ -114,14 +123,19 @@ export const AddSemestreDialog = ({ isOpen, setIsOpen }) => {
               </FormControl>
             </>
           )} />
-          <FormField name="mensualidades" render={({ field }) => (
-            <>
-              <FormLabel>Mensualidad</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="Ingresa la mensualidades" />
-              </FormControl>
-            </>
-          )} />
+          <FormField
+            control={form.control}
+            name="mensualidades"
+            render={({ field }) => (
+              <>
+                <FormLabel>Mensualidad</FormLabel>
+                <FormControl>
+                  <Input {...field} placeholder="Ingresa la mensualidades" />
+                  <FormMessage />
+                </FormControl>
+              </>
+            )}
+          />
           <FormField name="estado" render={({ field }) => (
             <>
               <FormLabel>Estado</FormLabel>
@@ -133,7 +147,6 @@ export const AddSemestreDialog = ({ isOpen, setIsOpen }) => {
                       role='combobox'
                       className={cn(
                         'w-auto justify-between',
-
                         !field.value && 'text-muted-foreground'
                       )}
                     >

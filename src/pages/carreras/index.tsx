@@ -7,6 +7,8 @@ import { carreraContext } from '@/context/carrerasContext.tsx'
 import { useEffect, useState } from 'react'
 import { columnsCarreras } from '@/pages/carreras/components/columnsCarreras.tsx'
 import { getCarreras } from '@/services/carrerasService.ts'
+import { FastFormAlumnos } from '@/components/fastFormAlumnos.tsx'
+import { FastFormPagos } from '@/components/fastFormPagos.tsx'
 export default function Tasks() {
 const [carrerasData, setCarrerasData] = useState([]); // Initialize with an empty array
   const fetchCarreras = async () => {
@@ -29,6 +31,8 @@ const [carrerasData, setCarrerasData] = useState([]); // Initialize with an empt
     <Layout>
       {/* ===== Top Heading ===== */}
       <LayoutHeader>
+        <FastFormAlumnos />
+        <FastFormPagos />
         <div className='ml-auto flex items-center space-x-4'>
           <ThemeSwitch />
           <UserNav />

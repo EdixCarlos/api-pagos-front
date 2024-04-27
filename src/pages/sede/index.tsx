@@ -7,6 +7,8 @@ import { useEffect, useState } from 'react'
 import { getSedes } from '@/services/sedeService.ts'
 import { sedeContext } from '@/context/sedeContext.tsx'
 import { columnsSedes } from '@/pages/sede/components/columnsSedes.tsx'
+import { FastFormAlumnos } from '@/components/fastFormAlumnos.tsx'
+import { FastFormPagos } from '@/components/fastFormPagos.tsx'
 export default function Tasks() {
 const [sedesData, setSedesData] = useState([]); // Initialize with an empty array
   const fetchSede = async () => {
@@ -31,6 +33,8 @@ const [sedesData, setSedesData] = useState([]); // Initialize with an empty arra
     <Layout>
       {/* ===== Top Heading ===== */}
       <LayoutHeader>
+        <FastFormAlumnos />
+        <FastFormPagos />
         <div className='ml-auto flex items-center space-x-4'>
           <ThemeSwitch />
           <UserNav />

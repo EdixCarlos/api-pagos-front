@@ -28,7 +28,21 @@ export function DataTableToolbar<TData>({
   const isFiltered = table.getState().columnFilters.length > 0
   const [isOpen, setIsOpen] = useState(false)
   const [semestreOptions, setSemestreOptions] = useState<Option[]>([]);
+  const [sedeOptions, setSedeOptions] = useState<Option[]>([]);
+  const fetchSedes = async () => {
+    const response = await getSedes();
+    const options = response.content.map(data => ({
+      value: data.id,
+      label: data.nombre,
+    }));
+    console.log(options)
+    setSedeOptions(options);
+    console.log(sedeOptions)
+  };
+  useEffect(() => {
+    fetchSedes();
 
+  }, []);
   const fetchSemestres = async () => {
     const response = await getSemestres();
     const options = response.content.map(semestre => ({
@@ -42,7 +56,10 @@ export function DataTableToolbar<TData>({
     fetchSemestres();
   }, [])
 
-
+  const fechaVencimientoOptions = [
+    { value: 'vencidas', label: 'Vencidas' },
+    { value: 'noVencidas', label: 'No Vencidas' },
+  ];
   return (
     <div className='flex items-center justify-between'>
       <div className='flex flex-1 flex-col-reverse items-start gap-y-2 sm:flex-row sm:items-center sm:space-x-2'>
@@ -60,6 +77,20 @@ export function DataTableToolbar<TData>({
               column={table.getColumn('semestre')}
               title="Semestre"
               options={semestreOptions}
+            />
+          )}
+          {table.getColumn('sede') && (
+            <DataTableFacetedFilter
+              column={table.getColumn('sede')}
+              title="Sede"
+              options={sedeOptions}
+            />
+          )}
+          {table.getColumn('fechaVencimiento') && (
+            <DataTableFacetedFilter
+              column={table.getColumn('fechaVencimiento')}
+              title="Fecha Vencimiento"
+              options={fechaVencimientoOptions}
             />
           )}
         </div>

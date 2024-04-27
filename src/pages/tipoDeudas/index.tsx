@@ -7,6 +7,8 @@ import { useEffect, useState } from 'react'
 import { getTipoDeudas } from '@/services/tipodeudaService.ts'
 import { tipoDeudaContext } from '@/context/tipoDeudasContext.tsx'
 import { columnsTipoDeuda } from '@/pages/tipoDeudas/components/columnsTipoDeuda.tsx'
+import { FastFormAlumnos } from '@/components/fastFormAlumnos.tsx'
+import { FastFormPagos } from '@/components/fastFormPagos.tsx'
 export default function Tasks() {
 const [tipoDeudaData, setTipoDeudaData] = useState([]); // Initialize with an empty array
   const fetchTipoDeuda = async () => {
@@ -29,6 +31,8 @@ const [tipoDeudaData, setTipoDeudaData] = useState([]); // Initialize with an em
     <Layout>
       {/* ===== Top Heading ===== */}
       <LayoutHeader>
+        <FastFormAlumnos />
+        <FastFormPagos />
         <div className='ml-auto flex items-center space-x-4'>
           <ThemeSwitch />
           <UserNav />

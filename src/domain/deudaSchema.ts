@@ -1,8 +1,8 @@
 import { z } from 'zod'
-import { alumnoSchema } from '@/pages/alumnos/data/alumnoSchema.ts'
-import { tipoDeudaSchema } from '@/pages/tasks/data/tipoDeudaSchema.ts'
-import { semestreSchema } from '@/pages/tasks/data/semestreSchema.ts'
 import { pagoSchema } from '@/domain/pagoSchema.ts'
+import { alumnoSchema } from '@/domain/alumnoSchema.ts'
+import { tipoDeudaSchema } from '@/domain/tipoDeudaSchema.ts'
+import { semestreSchema } from '@/domain/semestreSchema.ts'
 
 // We're keeping a simple non-relational schema here.
 // IRL, you will have a schema for your data models.

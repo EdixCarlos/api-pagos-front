@@ -38,7 +38,10 @@ export const AddPagoDialog = ({ isOpen, setIsOpen }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [deudaOptions, setDeudaOptions] = useState<Option[]>([]);
   const [alumnoOptions, setAlumnoOptions] = useState<Option[]>([]);
-
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    methods.setValue('user', user.id);
+  }, [methods]);
   useEffect(() => {
     const fetchDeuda = async () => {
       const response = await getDeudas();

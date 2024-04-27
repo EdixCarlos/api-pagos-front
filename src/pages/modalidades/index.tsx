@@ -7,6 +7,8 @@ import { modalidadContext } from '@/context/modalidadesContext.tsx'
 import { useEffect, useState } from 'react'
 import { getModalidades } from '@/services/modalidadesService.ts'
 import { columnsModalidades } from '@/pages/modalidades/components/columnsModalidades.tsx'
+import { FastFormAlumnos } from '@/components/fastFormAlumnos.tsx'
+import { FastFormPagos } from '@/components/fastFormPagos.tsx'
 export default function Modalidades() {
 const [modalidadesData, setModalidadesData] = useState([]); // Initialize with an empty array
   const fetchModalidad = async () => {
@@ -29,6 +31,8 @@ const [modalidadesData, setModalidadesData] = useState([]); // Initialize with a
     <Layout>
       {/* ===== Top Heading ===== */}
       <LayoutHeader>
+        <FastFormAlumnos />
+        <FastFormPagos />
         <div className='ml-auto flex items-center space-x-4'>
           <ThemeSwitch />
           <UserNav />

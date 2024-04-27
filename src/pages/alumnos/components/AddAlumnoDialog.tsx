@@ -30,7 +30,6 @@ interface Option {
 }
 export const AddAlumnoDialog = ({ isOpen, setIsOpen }) => {
   const { fetchAlumnos } = useContext(alumnosContext);
-  const [tipoDeudaOptions, setTipoDeudaOptions] = useState<Option[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const methods = useForm()
 

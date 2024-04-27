@@ -7,6 +7,8 @@ import { useEffect, useState } from 'react'
 import { getMatriculas } from '@/services/matriculasService.ts'
 import { matriculaContext } from '@/context/matriculaContext'
 import { columnsMatricula } from '@/pages/matricula/components/columnsMatricula.tsx'
+import { FastFormAlumnos } from '@/components/fastFormAlumnos.tsx'
+import { FastFormPagos } from '@/components/fastFormPagos.tsx'
 export default function Matriculas() {
 const [matriculasData, setMatriculasData] = useState([]); // Initialize with an empty array
   const fetchMatricula = async () => {
@@ -31,6 +33,8 @@ const [matriculasData, setMatriculasData] = useState([]); // Initialize with an 
     <Layout>
       {/* ===== Top Heading ===== */}
       <LayoutHeader>
+        <FastFormAlumnos />
+        <FastFormPagos />
         <div className='ml-auto flex items-center space-x-4'>
           <ThemeSwitch />
           <UserNav />

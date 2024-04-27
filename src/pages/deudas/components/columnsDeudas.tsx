@@ -6,6 +6,7 @@ import { DataTableColumnHeader } from './data-table-column-header'
 import { DataTableRowActions } from './data-table-row-actions'
 import { IconCoins } from '@tabler/icons-react';
 import { Deuda } from '@/domain/deudaSchema.ts'
+import { toZonedTime } from 'date-fns-tz';
 
 export const columnsDeudas: ColumnDef<Deuda>[] = [
   {
@@ -123,6 +124,26 @@ export const columnsDeudas: ColumnDef<Deuda>[] = [
         day: 'numeric'
       });
     },
+    filterFn: (row, _id, value) => {
+      const fechaVencimiento = new Date(row.original.fechaVencimiento + 'T00:00');
+      const fechaVencimientoZoned = toZonedTime(fechaVencimiento, 'America/Lima');
+      const fechaActual = new Date();
+      const fechaActualZoned = toZonedTime(fechaActual, 'America/Lima');
+
+      // Check if value is an array and contains 'vencidas' or 'noVencidas'
+      const isVencidas = Array.isArray(value) && value.includes('vencidas');
+      const isNoVencidas = Array.isArray(value) && value.includes('noVencidas');
+
+      // Return true if the due date is before the current date and the filter value is 'vencidas'
+      if (isVencidas) {
+        return fechaVencimientoZoned < fechaActualZoned;
+      }
+      // Return true if the due date is after the current date and the filter value is 'noVencidas'
+      else if (isNoVencidas) {
+        return fechaVencimientoZoned > fechaActualZoned;
+      }
+      return false;
+    },
   },
   {
     accessorKey: 'fechaUltimoPago',
@@ -169,6 +190,21 @@ export const columnsDeudas: ColumnDef<Deuda>[] = [
         ))}
       </div>
     ),
+  },
+  {
+    accessorKey: 'alumno.sede.nombre',
+    id: 'sede',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='Sede' />
+    ),
+    cell: ({ row }) => row.original.alumno.sede.nombre,
+    filterFn: (row, _id, value) => {
+      if (row.original.alumno && row.original.alumno.sede) {
+        const sedeId = row.original.alumno.sede.id;
+        return value.includes(sedeId);
+      }
+      return false;
+    },
   },
   {
     id: 'actions',

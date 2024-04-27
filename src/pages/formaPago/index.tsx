@@ -6,6 +6,8 @@ import { useEffect, useState } from 'react'
 import { getFormasPago } from '@/services/formaPagoService.ts'
 import { formaPagoContext } from '@/context/formaPagoContext.tsx'
 import { columnsFormaPago } from '@/pages/formaPago/components/columnsFormaPago.tsx'
+import { FastFormAlumnos } from '@/components/fastFormAlumnos.tsx'
+import { FastFormPagos } from '@/components/fastFormPagos.tsx'
 export default function FormaPago() {
   const [formaPagoData, setFormaPagoData] = useState([]); // Initialize with an empty array
   const fetchFormaPago = async () => {
@@ -29,6 +31,8 @@ export default function FormaPago() {
       <Layout>
         {/* ===== Top Heading ===== */}
         <LayoutHeader>
+          <FastFormAlumnos />
+          <FastFormPagos />
           <div className='ml-auto flex items-center space-x-4'>
             <ThemeSwitch />
             <UserNav />

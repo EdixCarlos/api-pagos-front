@@ -7,6 +7,7 @@ import { deudaContext } from '@/context/DeudaContext.tsx'
 import { useEffect, useState } from 'react'
 import { getDeudas } from '@/services/deudasService.ts'
 import { columnsDeudas } from '@/pages/tasks/components/deudas/columnsDeudas.tsx'
+import { Search } from '@/components/search.tsx'
 export default function Tasks() {
 const [deudasData, setDeudasData] = useState([]); // Initialize with an empty array
   const fetchDeudas = async () => {
@@ -32,6 +33,7 @@ const [deudasData, setDeudasData] = useState([]); // Initialize with an empty ar
       {/* ===== Top Heading ===== */}
       <LayoutHeader>
         <div className='ml-auto flex items-center space-x-4'>
+          <Search />
           <ThemeSwitch />
           <UserNav />
         </div>

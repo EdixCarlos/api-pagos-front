@@ -32,7 +32,7 @@ const formSchema = z.object({
       message: 'Please enter your password',
     })
     .min(7, {
-      message: 'Password must be at least 7 characters long',
+      message: 'Password must bea t least 7 characters long',
     }),
 })
 

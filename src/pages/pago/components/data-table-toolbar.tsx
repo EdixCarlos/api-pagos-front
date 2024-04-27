@@ -10,6 +10,7 @@ import { AddRecordDialog } from '@/components/custom/AddRecordDialog.tsx'
 import { useEffect, useState } from 'react'
 import { getUsuarios } from '@/services/usuariosService.ts'
 import { AddPagoDialog } from '@/pages/pago/components/AddPagoDialog.tsx'
+import { DialogReportPDFPagos } from '@/components/DialogReportPDFPagos.tsx'
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>
@@ -25,6 +26,7 @@ export function DataTableToolbar<TData>({
   const isFiltered = table.getState().columnFilters.length > 0
   const [isOpen, setIsOpen] = useState(false)
   const [userOptions, setUserOptions] = useState<Option[]>([]);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const fetchUsers = async () => {
     const response = await getUsuarios();
@@ -70,6 +72,10 @@ export function DataTableToolbar<TData>({
         )}
         <AddPagoDialog isOpen={isOpen} setIsOpen={setIsOpen} />
       </div>
+      <DialogReportPDFPagos isOpen={isDialogOpen} setIsOpen={setIsDialogOpen} />
+
+      <div className="mr-2"></div>
+
       <DataTableViewOptions table={table} />
     </div>
   )

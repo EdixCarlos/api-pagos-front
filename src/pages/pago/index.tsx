@@ -7,8 +7,12 @@ import { useEffect, useState } from 'react'
 import { columnsPagos } from '@/pages/pago/components/columnsPagos.tsx'
 import { getPagos } from '@/services/pagoService.ts'
 import { pagoContext } from '@/context/pagoContext.tsx'
+import { DialogReportPDFPagos } from '@/components/DialogReportPDFPagos.tsx'
+import { FastFormAlumnos } from '@/components/fastFormAlumnos.tsx'
+import { FastFormPagos } from '@/components/fastFormPagos.tsx'
 export default function Tasks() {
 const [pagosData, setPagosData] = useState([]); // Initialize with an empty array
+
   const fetchPago = async () => {
     try {
       const pagos = await getPagos();
@@ -32,7 +36,10 @@ const [pagosData, setPagosData] = useState([]); // Initialize with an empty arra
     <Layout>
       {/* ===== Top Heading ===== */}
       <LayoutHeader>
+        <FastFormAlumnos />
+        <FastFormPagos />
         <div className='ml-auto flex items-center space-x-4'>
+
           <ThemeSwitch />
           <UserNav />
         </div>

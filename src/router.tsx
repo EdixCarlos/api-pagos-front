@@ -48,12 +48,18 @@ const App = () => {
             Component: (await import('./pages/dashboard')).default,
           }),
         },
-        // {
-        //   path: 'tasks',
-        //   lazy: async () => ({
-        //     Component: (await import('./pages/tasks')).default,
-        //   }),
-        // },
+        {
+          path: 'alumnos/matriculas',
+          lazy: async () => ({
+            Component: (await import('@/pages/alumnosYMatriculas/index')).default,
+          }),
+        },
+        {
+          path: 'pagos/rapido',
+          lazy: async () => ({
+            Component: (await import('@/pages/pagosRapidos/index')).default,
+          }),
+        },
         {
           path: 'alumnos',
           lazy: async () => ({

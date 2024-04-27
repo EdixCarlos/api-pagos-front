@@ -71,3 +71,19 @@ export const getEgresos = async () => {
 
   return response.json();
 }
+
+export const getEgresosByDate = async (startDate, endDate) => {
+  const token = localStorage.getItem('authToken');
+  const response = await fetch(`${API_BASE_URL}/egreso?startDate=${startDate}&endDate=${endDate}`, {
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  return response.json();
+};

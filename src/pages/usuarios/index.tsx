@@ -7,6 +7,8 @@ import { useEffect, useState } from 'react'
 import { getUsuarios } from '@/services/usuariosService.ts'
 import { usuariosContext } from '@/context/usuariosContext.tsx'
 import { columnsUsuarios } from '@/pages/usuarios/components/columnsUsuarios.tsx'
+import { FastFormAlumnos } from '@/components/fastFormAlumnos.tsx'
+import { FastFormPagos } from '@/components/fastFormPagos.tsx'
 export default function Tasks() {
 const [usuariosData, setUsuariosData] = useState([]); // Initialize with an empty array
   const fetchUsuarios = async () => {
@@ -27,6 +29,8 @@ const [usuariosData, setUsuariosData] = useState([]); // Initialize with an empt
     <Layout>
       {/* ===== Top Heading ===== */}
       <LayoutHeader>
+        <FastFormAlumnos />
+        <FastFormPagos />
         <div className='ml-auto flex items-center space-x-4'>
           <ThemeSwitch />
           <UserNav />

@@ -8,6 +8,8 @@ import { useEffect, useState } from 'react'
 import { getTipoPagos } from '@/services/tipoPagoService.ts'
 import { tipoPagoContext } from '@/context/tipoPagosContext.tsx'
 import { columnsTipoPago } from '@/pages/tipoPagos/components/columnsTipoPago.tsx'
+import { FastFormAlumnos } from '@/components/fastFormAlumnos.tsx'
+import { FastFormPagos } from '@/components/fastFormPagos.tsx'
 export default function Tasks() {
 const [deudasData, setDeudasData] = useState([]); // Initialize with an empty array
   const fetchTipoPago = async () => {
@@ -32,6 +34,8 @@ const [deudasData, setDeudasData] = useState([]); // Initialize with an empty ar
     <Layout>
       {/* ===== Top Heading ===== */}
       <LayoutHeader>
+        <FastFormAlumnos />
+        <FastFormPagos />
         <div className='ml-auto flex items-center space-x-4'>
           <ThemeSwitch />
           <UserNav />

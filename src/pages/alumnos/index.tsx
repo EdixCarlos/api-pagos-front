@@ -7,6 +7,8 @@ import { alumnosContext } from '@/context/alumnosContext.tsx'
 import { useEffect, useState } from 'react'
 import { getAlumnos } from '@/services/alumnosService.ts'
 import { columnsAlumnos } from '@/pages/alumnos/components/columnsAlumnos.tsx'
+import { FastFormAlumnos } from '@/components/fastFormAlumnos.tsx'
+import { FastFormPagos } from '@/components/fastFormPagos.tsx'
 export default function Tasks() {
 const [alumnosData, setAlumnosData] = useState([]); // Initialize with an empty array
 
@@ -32,6 +34,8 @@ const [alumnosData, setAlumnosData] = useState([]); // Initialize with an empty 
     <Layout>
       {/* ===== Top Heading ===== */}
       <LayoutHeader>
+        <FastFormAlumnos />
+        <FastFormPagos />
         <div className='ml-auto flex items-center space-x-4'>
           <ThemeSwitch />
           <UserNav />

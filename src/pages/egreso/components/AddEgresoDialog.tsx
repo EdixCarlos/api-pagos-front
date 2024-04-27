@@ -33,7 +33,10 @@ export const AddEgresoDialog = ({ isOpen, setIsOpen }) => {
   const [formaPagoOptions, setFormaPagoOptions] = useState<Option[]>([]);
   const [sedeOptions, setSedeOptions] = useState<Option[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    methods.setValue('user', user.id);
+  }, [methods]);
   useEffect(() => {
     const fetchUser = async () => {
       const response = await getUsuarios();
@@ -55,7 +58,7 @@ export const AddEgresoDialog = ({ isOpen, setIsOpen }) => {
       const response = await getSedes();
       console.log(response.content)
       const options = response.content.map(sedes => ({
-        value: sedes.nombre,
+        value: sedes.id,
         label: sedes.nombre,
         icon: QuestionMarkCircledIcon,
       }));

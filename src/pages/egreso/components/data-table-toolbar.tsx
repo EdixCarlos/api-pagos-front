@@ -11,6 +11,8 @@ import { useEffect, useState } from 'react'
 import { getUsuarios } from '@/services/usuariosService.ts'
 import { AddPagoDialog } from '@/pages/pago/components/AddPagoDialog.tsx'
 import { AddEgresoDialog } from '@/pages/egreso/components/AddEgresoDialog.tsx'
+import { DialogReportPDFPagos } from '@/components/DialogReportPDFPagos.tsx'
+import { DialogReportPDFEgresos } from '@/components/DialogReportPDFEgresos.tsx'
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>
@@ -26,6 +28,7 @@ export function DataTableToolbar<TData>({
   const isFiltered = table.getState().columnFilters.length > 0
   const [isOpen, setIsOpen] = useState(false)
   const [userOptions, setUserOptions] = useState<Option[]>([]);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const fetchUsers = async () => {
     const response = await getUsuarios();
@@ -71,6 +74,9 @@ export function DataTableToolbar<TData>({
         )}
         <AddEgresoDialog isOpen={isOpen} setIsOpen={setIsOpen} />
       </div>
+      <DialogReportPDFEgresos isOpen={isDialogOpen} setIsOpen={setIsDialogOpen} />
+
+      <div className="mr-2"></div>
       <DataTableViewOptions table={table} />
     </div>
   )
