@@ -1,4 +1,4 @@
-// EditAlumnoDialog.tsx
+.// EditAlumnoDialog.tsx
 import { useForm } from 'react-hook-form'
 import {
   Dialog,
@@ -13,71 +13,59 @@ import { Form, FormField, FormControl, FormLabel, FormDescription, FormMessage }
 import { Input } from '@/components/ui/input.tsx'
 import { CaretSortIcon, CheckIcon, EnterIcon, PlusIcon } from '@radix-ui/react-icons'
 import { useToast } from '@/components/ui/use-toast.ts'
+import { deudaContext } from '@/context/DeudaContext.tsx'
 import React, { useEffect, useState } from 'react'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command.tsx'
 import { PopoverTrigger } from '@radix-ui/react-popover'
 import { Popover, PopoverContent } from '@/components/ui/popover.tsx'
 import { cn } from '@/lib/utils.ts'
+import { getTipoDeudas } from '@/services/tipodeudaService.ts'
+import { getSemestres } from '@/services/semestresService.ts'
 import { getAlumnos } from '@/services/alumnosService.ts'
-import { pagoContext } from '@/context/pagoContext.tsx'
-import { updatePago } from '@/services/pagoService.ts'
-import { getUsuarios } from '@/services/usuariosService.ts'
-import { getFormasPago } from '@/services/formaPagoService.ts'
-import { getTipoPagos } from '@/services/tipoPagoService.ts'
+import { updateDeuda } from '@/services/deudasService.ts'
+import { estadoDeudas } from '@/pages/deudas/data/data.tsx'
 
 
 interface Option {
   value: number;
   label: string;
 }
-export const EditPagoDialog = ({ isOpen, setIsOpen, pago }) => {
-  const { fetchPago } = React.useContext(pagoContext);
-  const methods = useForm({
+export const EditDeudaDialog = ({ isOpen, setIsOpen, deuda, formStructure }) => {
+  const { fetchDeudas } = React.useContext(deudaContext);
 
+  const methods = useForm({
     defaultValues: {
-      numRecibo: pago.numRecibo,
-      cantidad: pago.cantidad,
-      concepto: pago.concepto,
-      fechaPago: pago.fechaPago,
-      user: pago.user.id,
-      tipoPago: pago.tipoPago.id,
-      formaPago: pago.formaPago.id,
-      alumno: pago.alumno.id,
-      deudaId: pago.deudaId,
+      alumno: deuda.alumno.id,
+      semestre: deuda.semestre.id,
+      tipoDeuda: deuda.tipoDeuda.id,
+      montoTotal: deuda.montoTotal,
+      saldoPendiente: deuda.saldoPendiente,
+      fechaCreacion: deuda.fechaCreacion,
+      fechaVencimiento: deuda.fechaVencimiento,
+      fechaUltimoPago: deuda.fechaUltimoPago,
+      estado: deuda.estado,
+
+      // ...otros campos...
     },
   })
-  const [userOptions, setUserOptions] = useState<Option[]>([]);
-  const [tipoPagoOptions, setTipoPagoOptions] = useState<Option[]>([]);
-  const [formaPagoOptions, setFormaPagoOptions] = useState<Option[]>([]);
+  const [tipoDeudaOptions, setTipoDeudaOptions] = useState<Option[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  useEffect(() => {
+    const fetchTipoDeudas = async () => {
+      const response = await getTipoDeudas();
+      const options = response.content.map(deuda => ({
+        value: deuda.id,
+        label: deuda.nombre,
+      }));
+      setTipoDeudaOptions(options);
+    };
+
+    fetchTipoDeudas();
+  }, []);
   const [alumnoOptions, setAlumnoOptions] = useState<Option[]>([]);
+  const [semestreOptions, setSemestreOptions] = useState<Option[]>([]);
 
   useEffect(() => {
-    const fetchUser = async () => {
-      const response = await getUsuarios();
-      const options = response.map(user => ({
-        value: user.id,
-        label: user.name,
-      }));
-      setUserOptions(options);
-    };
-    const fetchTipoPago = async () => {
-      const response = await getTipoPagos();
-      const options = response.content.map(tipoPago => ({
-        value: tipoPago.id,
-        label: tipoPago.nombre,
-      }));
-      setTipoPagoOptions(options);
-    };
-    const fetchFormaPago = async () => {
-      const response = await getFormasPago();
-      const options = response.content.map(formaPago => ({
-        value: formaPago.id,
-        label: formaPago.name,
-      }));
-      setFormaPagoOptions(options);
-    };
-
     const fetchAlumnos = async () => {
       const response = await getAlumnos();
       const options = response.content.map(alumno => ({
@@ -87,42 +75,54 @@ export const EditPagoDialog = ({ isOpen, setIsOpen, pago }) => {
       setAlumnoOptions(options);
     };
 
+    const fetchSemestres = async () => {
+      const response = await getSemestres();
+      const options = response.content.map(semestre => ({
+        value: semestre.id,
+        label: semestre.nombre,
+      }));
+      setSemestreOptions(options);
+    };
+
     fetchAlumnos();
-    fetchFormaPago();
-    fetchUser();
-    fetchTipoPago();
+    fetchSemestres();
   }, []);
+  const filteredOptions = tipoDeudaOptions.filter((option) =>
+    option.label.toLowerCase().includes(searchTerm.toLowerCase())
+  );
   const toast = useToast()
 
   const closeDialog = () => setIsOpen(false)
 
   const handleEdit = async () => {
+    console.log('Editar registro')
     try {
       const formValues = methods.getValues()
-      const updatedPago = {
-        id: pago.id,
-        numRecibo: formValues.numRecibo,
-        cantidad: formValues.cantidad,
-        concepto: formValues.concepto,
-        fechaPago: formValues.fechaPago,
-        userId: formValues.user,
-        tipoPagoId: formValues.tipoPago,
-        formaPagoId: formValues.formaPago,
+      const updatedDeuda = {
+        id: deuda.id,
         alumnoId: formValues.alumno,
+        semestreId: formValues.semestre,
+        montoTotal: formValues.montoTotal,
+        saldoPendiente: formValues.saldoPendiente,
+        fechaCreacion: formValues.fechaCreacion,
+        fechaVencimiento: formValues.fechaVencimiento,
+        fechaUltimoPago: formValues.fechaUltimoPago,
+        estado: formValues.estado,
+        tipoDeudaId: formValues.tipoDeuda,
       }
-      await updatePago(updatedPago) // Asegúrate de tener una función para actualizar el registro
+      await updateDeuda(updatedDeuda) // Asegúrate de tener una función para actualizar el registro
       toast.toast({
         variant: 'success',
         title: 'Éxito',
-        description: 'La pago se ha actualizado correctamente.',
+        description: 'La deuda se ha actualizado correctamente.',
       })
-      fetchPago()
+      fetchDeudas()
       closeDialog()
     } catch (error) {
       toast.toast({
         variant: 'error',
         title: 'Error',
-        description: 'Hubo un error al actualizar la pago.',
+        description: 'Hubo un error al actualizar la deuda.',
       })
     }
   }
@@ -139,201 +139,8 @@ export const EditPagoDialog = ({ isOpen, setIsOpen, pago }) => {
         </Button>
       </DialogTrigger>
       <DialogContent className="overflow-auto max-h-screen">
-        <DialogTitle>Actualizar Pago</DialogTitle>
+        <DialogTitle>Actualizar Deuda</DialogTitle>
         <Form {...methods}>
-          <FormField name="numRecibo" render={({ field }) => (
-            <>
-              <FormLabel>Numero recibo</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="Ingresa el numero del recibo" />
-              </FormControl>
-            </>
-          )} />
-          <FormField name="cantidad" render={({ field }) => (
-            <>
-              <FormLabel>Cantidad</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="Ingresa la cantidad del pago" />
-              </FormControl>
-            </>
-          )} />
-          <FormField name="concepto" render={({ field }) => (
-            <>
-              <FormLabel>Concepto</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="Ingresa el concepto" />
-              </FormControl>
-            </>
-          )} />
-          <FormField name="fechaPago" render={({ field }) => (
-            <>
-              <FormLabel>Fecha de pago</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="Ingresa la fecha de pago" />
-              </FormControl>
-            </>
-          )} />
-          <FormField name="user" render={({ field }) => (
-            <>
-              <FormLabel>Usuario</FormLabel>
-              <FormControl>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant='outline'
-                      role='combobox'
-                      className={cn(
-                        'w-auto justify-between',
-                        !field.value && 'text-muted-foreground'
-                      )}
-                    >
-                      {field.value
-                        ? userOptions.find(
-                          (option) => option.value === field.value
-                        )?.label
-                        : 'Seleciona el usuario'}
-                      <CaretSortIcon className='ml-2 h-4 w-4 shrink-0 opacity-50' />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className='w-auto p-0'>
-                    <Command>
-                      <CommandInput placeholder='Search...' onValueChange={setSearchTerm} />
-                      <CommandEmpty>No options found.</CommandEmpty>
-                      <CommandGroup>
-                        {userOptions.map((option) => (
-                          <CommandItem
-                            value={option.label}
-                            key={option.value}
-                            onSelect={() => {
-                              methods.setValue('user', option.value);
-                            }}
-                          >
-                            <CheckIcon
-                              className={cn(
-                                'mr-2 h-4 w-4',
-                                option.value === field.value
-                                  ? 'opacity-100'
-                                  : 'opacity-0'
-                              )}
-                            />
-                            {option.label}
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-              </FormControl>
-            </>
-          )} />
-          <FormField name="tipoPago" render={({ field }) => (
-            <>
-              <FormLabel>Tipo de Pago</FormLabel>
-              <FormControl>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant='outline'
-                      role='combobox'
-                      className={cn(
-                        'w-auto justify-between',
-
-                        !field.value && 'text-muted-foreground'
-                      )}
-                    >
-                      {field.value
-                        ? tipoPagoOptions.find(
-                          (option) => option.value === field.value
-                        )?.label
-                        : 'Select tipo de pago'}
-                      <CaretSortIcon className='ml-2 h-4 w-4 shrink-0 opacity-50' />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className='w-auto p-0'>
-                    <Command>
-                      <CommandInput placeholder='Search...' onValueChange={setSearchTerm} />
-                      <CommandEmpty>No options found.</CommandEmpty>
-                      <CommandGroup>
-                        {tipoPagoOptions.map((option) => (
-                          <CommandItem
-                            value={option.label}
-                            key={option.value}
-                            onSelect={() => {
-                              methods.setValue('tipoPago', option.value);
-                            }}
-                          >
-                            <CheckIcon
-                              className={cn(
-                                'mr-2 h-4 w-4',
-                                option.value === field.value
-                                  ? 'opacity-100'
-                                  : 'opacity-0'
-                              )}
-                            />
-                            {option.label}
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-              </FormControl>
-            </>
-          )} />
-          <FormField name="formaPago" render={({ field }) => (
-            <>
-              <FormLabel>Forma de Pago</FormLabel>
-              <FormControl>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant='outline'
-                      role='combobox'
-                      className={cn(
-                        'w-auto justify-between',
-
-                        !field.value && 'text-muted-foreground'
-                      )}
-                    >
-                      {field.value
-                        ? formaPagoOptions.find(
-                          (option) => option.value === field.value
-                        )?.label
-                        : 'Selecciona la forma de pago'}
-                      <CaretSortIcon className='ml-2 h-4 w-4 shrink-0 opacity-50' />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className='w-auto p-0'>
-                    <Command>
-                      <CommandInput placeholder='Search...' onValueChange={setSearchTerm} />
-                      <CommandEmpty>No options found.</CommandEmpty>
-                      <CommandGroup>
-                        {formaPagoOptions.map((option) => (
-                          <CommandItem
-                            value={option.label}
-                            key={option.value}
-                            onSelect={() => {
-                              methods.setValue('formaPago', option.value);
-                            }}
-                          >
-                            <CheckIcon
-                              className={cn(
-                                'mr-2 h-4 w-4',
-                                option.value === field.value
-                                  ? 'opacity-100'
-                                  : 'opacity-0'
-                              )}
-                            />
-                            {option.label}
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-              </FormControl>
-            </>
-          )} />
           <FormField name="alumno" render={({ field }) => (
             <>
               <FormLabel>Alumno</FormLabel>
@@ -367,6 +174,210 @@ export const EditPagoDialog = ({ isOpen, setIsOpen, pago }) => {
                             key={option.value}
                             onSelect={() => {
                               methods.setValue('alumno', option.value);
+                            }}
+                          >
+                            <CheckIcon
+                              className={cn(
+                                'mr-2 h-4 w-4',
+                                option.value === field.value
+                                  ? 'opacity-100'
+                                  : 'opacity-0'
+                              )}
+                            />
+                            {option.label}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+              </FormControl>
+            </>
+          )} />
+          <FormField name="semestre" render={({ field }) => (
+            <>
+              <FormLabel>Semestre</FormLabel>
+              <FormControl>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant='outline'
+                      role='combobox'
+                      className={cn(
+                        'w-auto justify-between',
+                        !field.value && 'text-muted-foreground'
+                      )}
+                    >
+                      {field.value
+                        ? semestreOptions.find(
+                          (option) => option.value === field.value
+                        )?.label
+                        : 'Select semestre'}
+                      <CaretSortIcon className='ml-2 h-4 w-4 shrink-0 opacity-50' />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    className='w-auto p-0'
+                  >
+                    <Command>
+                      <CommandInput placeholder='Search...' onValueChange={setSearchTerm} />
+                      <CommandEmpty>No options found.</CommandEmpty>
+                      <CommandGroup>
+                        {semestreOptions.map((option) => (
+                          <CommandItem
+                            value={option.label}
+                            key={option.value}
+                            onSelect={() => {
+                              methods.setValue('semestre', option.value);
+                            }}
+                          >
+                            <CheckIcon
+                              className={cn(
+                                'mr-2 h-4 w-4',
+                                option.value === field.value
+                                  ? 'opacity-100'
+                                  : 'opacity-0'
+                              )}
+                            />
+                            {option.label}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+              </FormControl>
+            </>
+          )} />
+          <FormField name="montoTotal" render={({ field }) => (
+            <>
+              <FormLabel>Monto Total</FormLabel>
+              <FormControl>
+                <Input {...field} placeholder="Ingresa el monto total" />
+              </FormControl>
+            </>
+          )} />
+          <FormField name="saldoPendiente" render={({ field }) => (
+            <>
+              <FormLabel>Saldo Pendiente</FormLabel>
+              <FormControl>
+                <Input {...field} placeholder="Ingresa el saldo pendiente" />
+              </FormControl>
+            </>
+          )} />
+          <FormField name="fechaCreacion" render={({ field }) => (
+            <>
+              <FormLabel>Fecha de Creación</FormLabel>
+              <FormControl>
+                <Input {...field} placeholder="Ingresa la fecha de creación" />
+              </FormControl>
+            </>
+          )} />
+          <FormField name="fechaVencimiento" render={({ field }) => (
+            <>
+              <FormLabel>Fecha de Vencimiento</FormLabel>
+              <FormControl>
+                <Input {...field} placeholder="Ingresa la fecha de vencimiento" />
+              </FormControl>
+            </>
+          )} />
+          <FormField name="fechaUltimoPago" render={({ field }) => (
+            <>
+              <FormLabel>Fecha del Último Pago</FormLabel>
+              <FormControl>
+                <Input {...field} placeholder="Ingresa la fecha del último pago" />
+              </FormControl>
+            </>
+          )} />
+          <FormField name="estado" render={({ field }) => (
+            <>
+              <FormLabel>Estado</FormLabel>
+              <FormControl>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant='outline'
+                      role='combobox'
+                      className={cn(
+                        'w-auto justify-between',
+
+                        !field.value && 'text-muted-foreground'
+                      )}
+                    >
+                      {field.value
+                        ? estadoDeudas.find(
+                          (option) => option.value === field.value
+                        )?.label
+                        : 'Select estado'}
+                      <CaretSortIcon className='ml-2 h-4 w-4 shrink-0 opacity-50' />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className='w-auto p-0'>
+                    <Command>
+                      <CommandInput placeholder='Search...' onValueChange={setSearchTerm} />
+                      <CommandEmpty>No options found.</CommandEmpty>
+                      <CommandGroup>
+                        {estadoDeudas.map((option) => (
+                          <CommandItem
+                            value={option.label}
+                            key={option.value}
+                            onSelect={() => {
+                              methods.setValue('estado', option.value);
+                            }}
+                          >
+                            <CheckIcon
+                              className={cn(
+                                'mr-2 h-4 w-4',
+                                option.value === field.value
+                                  ? 'opacity-100'
+                                  : 'opacity-0'
+                              )}
+                            />
+                            {option.label}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+              </FormControl>
+            </>
+          )} />
+
+          <FormField name="tipoDeuda" render={({ field }) => (
+            <>
+              <FormLabel>Tipo de Deuda</FormLabel>
+              <FormControl>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant='outline'
+                      role='combobox'
+                      className={cn(
+                        'w-auto justify-between',
+
+                        !field.value && 'text-muted-foreground'
+                      )}
+                    >
+                      {field.value
+                        ? tipoDeudaOptions.find(
+                          (option) => option.value === field.value
+                        )?.label
+                        : 'Select tipo de deuda'}
+                      <CaretSortIcon className='ml-2 h-4 w-4 shrink-0 opacity-50' />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className='w-auto p-0'>
+                    <Command>
+                      <CommandInput placeholder='Search...' onValueChange={setSearchTerm} />
+                      <CommandEmpty>No options found.</CommandEmpty>
+                      <CommandGroup>
+                        {filteredOptions.map((option) => (
+                          <CommandItem
+                            value={option.label}
+                            key={option.value}
+                            onSelect={() => {
+                              methods.setValue('tipoDeuda', option.value);
                             }}
                           >
                             <CheckIcon

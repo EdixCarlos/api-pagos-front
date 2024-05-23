@@ -139,6 +139,21 @@ export const columnsSemestres: ColumnDef<Semestre>[] = [
     },
   },
   {
+    accessorKey: 'fechaInicio',
+    id: 'fechaInicio',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Fecha Inicio" />
+    ),
+    cell: ({ row }) => {
+      const date = new Date(row.original.fechaInicio + 'T00:00');
+      return date.toLocaleDateString('es-ES', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    },
+  },
+  {
     id: 'actions',
     cell: ({ row }) => <DataTableRowActions row={row} />,
   },

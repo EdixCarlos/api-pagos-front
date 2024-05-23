@@ -45,6 +45,12 @@ export const sidelinks: SideLink[] = [
   //   icon: <IconChecklist size={18} />,
   // },
   {
+    title: 'Deudas optimizadas',
+    label: '',
+    href: '/optimizacion',
+    icon: <IconPercentage  size={18} />,
+  },
+  {
     title: 'Alumnos',
     label: '',
     href: '/alumnos',

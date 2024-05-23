@@ -13,89 +13,93 @@ import { Form, FormField, FormControl, FormLabel, FormDescription, FormMessage }
 import { Input } from '@/components/ui/input.tsx'
 import { PlusIcon, EnterIcon, CaretSortIcon, CheckIcon } from '@radix-ui/react-icons'
 import { useToast } from '@/components/ui/use-toast.ts'
+import { createDeuda } from '@/services/deudasService.ts'
 import React, { useContext, useEffect, useState } from 'react'
+import { deudaContext } from '@/context/DeudaContext.tsx'
+import { getTipoDeudas } from '@/services/tipodeudaService.ts'
+import { getAlumnos } from '@/services/alumnosService.ts'
+import { getSemestres } from '@/services/semestresService.ts'
 import { Popover, PopoverContent } from '@/components/ui/popover.tsx'
 import { PopoverTrigger } from '@radix-ui/react-popover'
 import { cn } from '@/lib/utils.ts'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command.tsx'
-import { getModalidades } from '@/services/modalidadesService.ts'
-import { getCarreras } from '@/services/carrerasService.ts'
-import { semestreContext } from '@/context/semestresContext.tsx'
-import { createSede } from '@/services/sedeService.ts'
-import { createSemestre } from '@/services/semestresService.ts'
+import { estadoAlumnos } from '@/pages/alumnos/data/data.tsx'
 import { estadoDeudas } from '@/pages/deudas/data/data.tsx'
-import { estadoSemestres } from '@/pages/semestres/data/data.tsx'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod';
-
 interface Option {
   value: number;
   label: string;
 }
-const formSchema = z.object({
-  mensualidades: z.number().min(1, 'Debe ser al menos 1').max(12, 'No puede ser mayor que 12'),
-});
-
-export const AddSemestreDialog = ({ isOpen, setIsOpen }) => {
-  const { fetchSemestre } = useContext(semestreContext);
-  const methods = useForm()
+export const AddDeudaDialog = ({ isOpen, setIsOpen }) => {
+  const { fetchDeudas } = useContext(deudaContext);
+  const [tipoDeudaOptions, setTipoDeudaOptions] = useState<Option[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [modalidadesOptions, setModalidadesOptions] = useState<Option[]>([]);
-  const [carrerasOptions, setCarrerasOptions] = useState<Option[]>([]);
-  const form = useForm({
-    resolver: zodResolver(formSchema),
-  });
+  const [alumnoOptions, setAlumnoOptions] = useState<Option[]>([]);
+  const [semestreOptions, setSemestreOptions] = useState<Option[]>([]);
+  const methods = useForm()
+
   useEffect(() => {
-    const fetchModalidades = async () => {
-      const response = await getModalidades();
-      const options = response.content.map(modalidad => ({
-        value: modalidad.id,
-        label: modalidad.name,
+    const fetchTipoDeudas = async () => {
+      const response = await getTipoDeudas();
+      const options = response.content.map(deuda => ({
+        value: deuda.id,
+        label: deuda.nombre,
       }));
-      setModalidadesOptions(options);
+      setTipoDeudaOptions(options);
     };
 
-    const fetchCarreras = async () => {
-      const response = await getCarreras();
-      const options = response.content.map(carrera => ({
-        value: carrera.id,
-        label: carrera.nombre,
+    const fetchAlumnos = async () => {
+      const response = await getAlumnos();
+      const options = response.content.map(alumno => ({
+        value: alumno.id,
+        label: `${alumno.apellidos}, ${alumno.nombres} `,
       }));
-      setCarrerasOptions(options);
+      setAlumnoOptions(options);
     };
 
-    fetchModalidades();
-    fetchCarreras();
+    const fetchSemestres = async () => {
+      const response = await getSemestres();
+      const options = response.content.map(semestre => ({
+        value: semestre.id,
+        label: semestre.nombre,
+      }));
+      setSemestreOptions(options);
+    };
+
+    fetchAlumnos();
+    fetchSemestres();
+    fetchTipoDeudas();
   }, []);
+
   const toast = useToast()
   const closeDialog = () => setIsOpen(false)
   const handleAdd = async () => {
     try {
-      const semestre = methods.getValues()
-      const addSemestre = {
-        nombre: semestre.nombre,
-        mensualidades: semestre.mensualidades,
-        modalidadId: semestre.modalidad,
-        carreraId: semestre.carrera,
-        num: semestre.num,
-        costoMatricula: semestre.costoMatricula,
-        costoMensualidad: semestre.costoMensualidad,
-        estado: semestre.estado,
+      const deuda = methods.getValues()
+      const addDeuda = {
+        alumnoId: deuda.alumno,
+        semestreId: deuda.semestre,
+        montoTotal: deuda.montoTotal,
+        saldoPendiente: deuda.saldoPendiente,
+        fechaCreacion: deuda.fechaCreacion,
+        fechaVencimiento: deuda.fechaVencimiento,
+        fechaUltimoPago: deuda.fechaUltimoPago,
+        estado: deuda.estado,
+        tipoDeudaId: deuda.tipoDeuda,
       }
-      await createSemestre(addSemestre)
+      await createDeuda(addDeuda)
       toast.toast({
         variant: 'success',
         title: 'Éxito',
-        description: 'La semestre se ha añadido correctamente.'
+        description: 'La deuda se ha añadido correctamente.'
       })
-      fetchSemestre()
+      fetchDeudas()
       closeDialog()
       methods.reset()
     } catch (error) {
       toast.toast({
         variant: 'error',
         title: 'Error',
-        description: 'Hubo un error al añadir la semestre.'
+        description: 'Hubo un error al añadir la deuda.'
       })
     }
     methods.reset()
@@ -113,21 +117,153 @@ export const AddSemestreDialog = ({ isOpen, setIsOpen }) => {
         </Button>
       </DialogTrigger>
       <DialogContent className="overflow-auto max-h-screen">
-        <DialogTitle>Agregar Semestre</DialogTitle>
+        <DialogTitle>Agregar Deuda</DialogTitle>
         <Form {...methods}>
-          <FormField name="nombre" render={({ field }) => (
+          <FormField name="alumno" render={({ field }) => (
             <>
-              <FormLabel>Nombre</FormLabel>
+              <FormLabel>Alumno</FormLabel>
               <FormControl>
-                <Input {...field} placeholder="Ingresa el nombre" />
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant='outline'
+                      role='combobox'
+                      className={cn(
+                        'w-auto justify-between',
+                        !field.value && 'text-muted-foreground'
+                      )}
+                    >
+                      {field.value
+                        ? alumnoOptions.find(
+                          (option) => option.value === field.value
+                        )?.label
+                        : 'Select alumno'}
+                      <CaretSortIcon className='ml-2 h-4 w-4 shrink-0 opacity-50' />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className='w-auto p-0'>
+                    <Command>
+                      <CommandInput placeholder='Search...' onValueChange={setSearchTerm} />
+                      <CommandEmpty>No options found.</CommandEmpty>
+                      <CommandGroup>
+                        {alumnoOptions.map((option) => (
+                          <CommandItem
+                            value={option.label}
+                            key={option.value}
+                            onSelect={() => {
+                              methods.setValue('alumno', option.value);
+                            }}
+                          >
+                            <CheckIcon
+                              className={cn(
+                                'mr-2 h-4 w-4',
+                                option.value === field.value
+                                  ? 'opacity-100'
+                                  : 'opacity-0'
+                              )}
+                            />
+                            {option.label}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
               </FormControl>
             </>
           )} />
-          <FormField name="mensualidades" render={({ field }) => (
+          <FormField name="semestre" render={({ field }) => (
             <>
-              <FormLabel>Mensualidades</FormLabel>
+              <FormLabel>Semestre</FormLabel>
               <FormControl>
-                <Input {...field} placeholder="Ingresa el numero de mensualidades" />
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant='outline'
+                      role='combobox'
+                      className={cn(
+                        'w-auto justify-between',
+                        !field.value && 'text-muted-foreground'
+                      )}
+                    >
+                      {field.value
+                        ? semestreOptions.find(
+                          (option) => option.value === field.value
+                        )?.label
+                        : 'Select semestre'}
+                      <CaretSortIcon className='ml-2 h-4 w-4 shrink-0 opacity-50' />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    className='w-auto p-0'
+                  >
+                    <Command>
+                      <CommandInput placeholder='Search...' onValueChange={setSearchTerm} />
+                      <CommandEmpty>No options found.</CommandEmpty>
+                      <CommandGroup>
+                        {semestreOptions.map((option) => (
+                          <CommandItem
+                            value={option.label}
+                            key={option.value}
+                            onSelect={() => {
+                              methods.setValue('semestre', option.value);
+                            }}
+                          >
+                            <CheckIcon
+                              className={cn(
+                                'mr-2 h-4 w-4',
+                                option.value === field.value
+                                  ? 'opacity-100'
+                                  : 'opacity-0'
+                              )}
+                            />
+                            {option.label}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+              </FormControl>
+            </>
+          )} />
+          <FormField name="montoTotal" render={({ field }) => (
+            <>
+              <FormLabel>Monto Total</FormLabel>
+              <FormControl>
+                <Input {...field} placeholder="Ingresa el monto total" />
+              </FormControl>
+            </>
+          )} />
+          <FormField name="saldoPendiente" render={({ field }) => (
+            <>
+              <FormLabel>Saldo Pendiente</FormLabel>
+              <FormControl>
+                <Input {...field} placeholder="Ingresa el saldo pendiente" />
+              </FormControl>
+            </>
+          )} />
+          <FormField name="fechaCreacion" render={({ field }) => (
+            <>
+              <FormLabel>Fecha de Creación</FormLabel>
+              <FormControl>
+                <Input {...field} placeholder="Ingresa la fecha de creación" />
+              </FormControl>
+            </>
+          )} />
+          <FormField name="fechaVencimiento" render={({ field }) => (
+            <>
+              <FormLabel>Fecha de Vencimiento</FormLabel>
+              <FormControl>
+                <Input {...field} placeholder="Ingresa la fecha de vencimiento" />
+              </FormControl>
+            </>
+          )} />
+          <FormField name="fechaUltimoPago" render={({ field }) => (
+            <>
+              <FormLabel>Fecha del Último Pago</FormLabel>
+              <FormControl>
+                <Input {...field} placeholder="Ingresa la fecha del último pago" />
               </FormControl>
             </>
           )} />
@@ -142,11 +278,12 @@ export const AddSemestreDialog = ({ isOpen, setIsOpen }) => {
                       role='combobox'
                       className={cn(
                         'w-auto justify-between',
+
                         !field.value && 'text-muted-foreground'
                       )}
                     >
                       {field.value
-                        ? estadoSemestres.find(
+                        ? estadoDeudas.find(
                           (option) => option.value === field.value
                         )?.label
                         : 'Select estado'}
@@ -158,7 +295,7 @@ export const AddSemestreDialog = ({ isOpen, setIsOpen }) => {
                       <CommandInput placeholder='Search...' onValueChange={setSearchTerm} />
                       <CommandEmpty>No options found.</CommandEmpty>
                       <CommandGroup>
-                        {estadoSemestres.map((option) => (
+                        {estadoDeudas.map((option) => (
                           <CommandItem
                             value={option.label}
                             key={option.value}
@@ -185,9 +322,9 @@ export const AddSemestreDialog = ({ isOpen, setIsOpen }) => {
             </>
           )} />
 
-          <FormField name="modalidad" render={({ field }) => (
+          <FormField name="tipoDeuda" render={({ field }) => (
             <>
-              <FormLabel>Modalidad</FormLabel>
+              <FormLabel>Tipo de Deuda</FormLabel>
               <FormControl>
                 <Popover>
                   <PopoverTrigger asChild>
@@ -201,10 +338,10 @@ export const AddSemestreDialog = ({ isOpen, setIsOpen }) => {
                       )}
                     >
                       {field.value
-                        ? modalidadesOptions.find(
+                        ? tipoDeudaOptions.find(
                           (option) => option.value === field.value
                         )?.label
-                        : 'Select modalidad'}
+                        : 'Select tipo de deuda'}
                       <CaretSortIcon className='ml-2 h-4 w-4 shrink-0 opacity-50' />
                     </Button>
                   </PopoverTrigger>
@@ -213,12 +350,12 @@ export const AddSemestreDialog = ({ isOpen, setIsOpen }) => {
                       <CommandInput placeholder='Search...' onValueChange={setSearchTerm} />
                       <CommandEmpty>No options found.</CommandEmpty>
                       <CommandGroup>
-                        {modalidadesOptions.map((option) => (
+                        {tipoDeudaOptions.map((option) => (
                           <CommandItem
                             value={option.label}
                             key={option.value}
                             onSelect={() => {
-                              methods.setValue('modalidad', option.value);
+                              methods.setValue('tipoDeuda', option.value);
                             }}
                           >
                             <CheckIcon
@@ -236,84 +373,6 @@ export const AddSemestreDialog = ({ isOpen, setIsOpen }) => {
                     </Command>
                   </PopoverContent>
                 </Popover>
-              </FormControl>
-            </>
-          )} />
-          <FormField name="carrera" render={({ field }) => (
-            <>
-              <FormLabel>Carrera</FormLabel>
-              <FormControl>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant='outline'
-                      role='combobox'
-                      className={cn(
-                        'w-auto justify-between',
-
-                        !field.value && 'text-muted-foreground'
-                      )}
-                    >
-                      {field.value
-                        ? carrerasOptions.find(
-                          (option) => option.value === field.value
-                        )?.label
-                        : 'Select carrera'}
-                      <CaretSortIcon className='ml-2 h-4 w-4 shrink-0 opacity-50' />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className='w-auto p-0'>
-                    <Command>
-                      <CommandInput placeholder='Search...' onValueChange={setSearchTerm} />
-                      <CommandEmpty>No options found.</CommandEmpty>
-                      <CommandGroup>
-                        {carrerasOptions.map((option) => (
-                          <CommandItem
-                            value={option.label}
-                            key={option.value}
-                            onSelect={() => {
-                              methods.setValue('carrera', option.value);
-                            }}
-                          >
-                            <CheckIcon
-                              className={cn(
-                                'mr-2 h-4 w-4',
-                                option.value === field.value
-                                  ? 'opacity-100'
-                                  : 'opacity-0'
-                              )}
-                            />
-                            {option.label}
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-              </FormControl>
-            </>
-          )} />
-          <FormField name="num" render={({ field }) => (
-            <>
-              <FormLabel>Numero de Semestre</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="Ingresa el numero" />
-              </FormControl>
-            </>
-          )} />
-          <FormField name="costoMatricula" render={({ field }) => (
-            <>
-              <FormLabel>Costo Matricula</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="Ingresa el costo" />
-              </FormControl>
-            </>
-          )} />
-          <FormField name="costoMensualidad" render={({ field }) => (
-            <>
-              <FormLabel>Costo Mensualidad</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="Ingresa el costo" />
               </FormControl>
             </>
           )} />

@@ -100,7 +100,8 @@ export const columnsAlumnos: ColumnDef<Alumno>[] = [
         day: 'numeric'
       });
     },
-  },{
+  },
+  {
     accessorKey: 'fechaInscripcion',
     id: 'fechaInscripcion',
     header: ({ column }) => (

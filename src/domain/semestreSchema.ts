@@ -14,6 +14,7 @@ export const semestreSchema = z.object({
   num: z.number().optional().nullable(),
   costoMatricula: z.number().optional().nullable(),
   costoMensualidad: z.number().optional().nullable(),
+  fechaInicio: z.string().optional().nullable(),
 })
 export type Semestre = z.infer<typeof semestreSchema>
 

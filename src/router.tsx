@@ -85,6 +85,12 @@ const App = () => {
           }),
         },
         {
+          path: 'optimizacion',
+          lazy: async () => ({
+            Component: (await import('@/pages/deudasOptimizadas/index')).default,
+          }),
+        },
+        {
           path: 'horarios',
           lazy: async () => ({
             Component: (await import('@/pages/horarios/index')).default,

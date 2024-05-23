@@ -16,13 +16,12 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 
+import { deudaSchema } from '@/pages/tasks/data/deudaSchema.ts'
 import React, { useState } from 'react'
+import { deleteDeuda } from '@/services/deudasService.ts'
 import { useToast } from '@/components/ui/use-toast.ts'
-import { EditCarreraDialog } from '@/pages/carreras/components/EditCarreraDialog.tsx'
-import { carreraSchema } from '@/domain/carreraSchema.ts'
-import { carreraContext } from '@/context/carrerasContext.tsx'
-import { deleteCarrera } from '@/services/carrerasService.ts'
-import { CrearCicloDialog } from '@/pages/carreras/components/CrearCicloCarreraDialog.tsx'
+import { deudaContext } from '@/context/DeudaContext.tsx'
+import { EditDeudaDialog } from '@/pages/deudas/components/EditDeudaDialog.tsx'
 interface IData {
   id: number;
   // otras propiedades...
@@ -34,30 +33,29 @@ interface DataTableRowActionsProps<TData extends IData> {
 export function DataTableRowActions<TData extends IData>({
   row,
 }: DataTableRowActionsProps<TData>) {
-  const { fetchCarreras } = React.useContext(carreraContext);
+  const { fetchDeudas } = React.useContext(deudaContext);
 
   const toast = useToast()
 
-  const carrera = carreraSchema.parse(row.original)
+  const deuda = deudaSchema.parse(row.original)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [isCreateCycleDialogOpen, setIsCreateCycleDialogOpen] = useState(false);
   const handleDelete = async () => {
     try {
-      await deleteCarrera(row.original.id);
+      await deleteDeuda(row.original.id);
       toast.toast({
         variant: 'success',
         title: 'Éxito',
-        description: 'La carrera se ha eliminado correctamente.',
+        description: 'La deuda se ha eliminado correctamente.',
       })
     } catch (error) {
       toast.toast({
         variant: 'error',
         title: 'Error',
-        description: 'Hubo un error al eliminar la carrera.',
+        description: 'Hubo un error al eliminar la deuda.',
       })
-      console.error('Error deleting carrera:', error);
+      console.error('Error deleting deuda:', error);
     }
-    fetchCarreras()
+    fetchDeudas()
   };
   return (
     <DropdownMenu>
@@ -73,10 +71,6 @@ export function DataTableRowActions<TData extends IData>({
       <DropdownMenuContent align='end' className='w-[160px]'>
         <DropdownMenuItem onClick={() => setIsEditDialogOpen(true)}>Editar
           <DropdownMenuShortcut>Shift+P</DropdownMenuShortcut>
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={()=> setIsCreateCycleDialogOpen(true)}>
-          Crear Semestre
-          <DropdownMenuShortcut>Shift+C</DropdownMenuShortcut>
         </DropdownMenuItem>
         {/*<DropdownMenuItem>Make a copy</DropdownMenuItem>*/}
         {/*<DropdownMenuItem>Favorite</DropdownMenuItem>*/}
@@ -100,17 +94,10 @@ export function DataTableRowActions<TData extends IData>({
         </DropdownMenuItem>
       </DropdownMenuContent>
       {isEditDialogOpen && (
-        <EditCarreraDialog
+        <EditDeudaDialog
           isOpen={isEditDialogOpen}
           setIsOpen={setIsEditDialogOpen}
-          carrera={carrera}
-        />
-      )}
-      {isCreateCycleDialogOpen && (
-        <CrearCicloDialog
-          isOpen={isCreateCycleDialogOpen}
-          setIsOpen={setIsCreateCycleDialogOpen}
-          carrera={carrera}
+          deuda={deuda}
         />
       )}
     </DropdownMenu>

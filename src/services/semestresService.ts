@@ -42,6 +42,29 @@ export const createSemestre = async (semestre) => {
 
 }
 
+export const createSemestreInCarrera = async (semestre) => {
+  try {
+    const token = localStorage.getItem('authToken');
+    const response = await fetch(`${API_BASE_URL}/semestres`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(semestre),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return response.json();
+  } catch (error) {
+    console.error(error);
+  }
+
+}
+
 export const deleteSemestre = async (id) => {
   try {
     const token = localStorage.getItem('authToken');

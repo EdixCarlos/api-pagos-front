@@ -3,6 +3,7 @@ import { pagoSchema } from '@/domain/pagoSchema.ts'
 import { alumnoSchema } from '@/domain/alumnoSchema.ts'
 import { tipoDeudaSchema } from '@/domain/tipoDeudaSchema.ts'
 import { semestreSchema } from '@/domain/semestreSchema.ts'
+import { sedeSchema } from '@/domain/sedeSchema.ts'
 
 // We're keeping a simple non-relational schema here.
 // IRL, you will have a schema for your data models.
@@ -18,6 +19,7 @@ export const deudaSchema = z.object({
   estado: z.string().optional().nullable(),
   tipoDeuda: tipoDeudaSchema,
   pagos: z.array(pagoSchema).optional().nullable(),
+  sede: sedeSchema,
   })
 
 export type Deuda = z.infer<typeof deudaSchema>

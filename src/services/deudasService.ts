@@ -2,11 +2,35 @@ import { config } from '@/lib/config.ts'
 
 const API_BASE_URL = config.apiUrl;
 
-
-
-export const getDeudas = async () => {
+export const getDeudas = async (
+  page?: number,
+  size?: number,
+  alumno?: string,
+  sedeId?: number,
+  semestreId?: number,
+  vencido?: boolean
+) => {
   const token = localStorage.getItem('authToken');
-  const response = await fetch(`${API_BASE_URL}/deudas/?page=0&size=100000`, {
+
+  const actualPage = page !== undefined ? page : 0;
+  const actualSize = size !== undefined ? size : 100000;
+
+  let url = `${API_BASE_URL}/deudas/?page=${actualPage}&size=${actualSize}`;
+
+  if (alumno) {
+    url += `&alumno=${alumno}`;
+  }
+  if (sedeId) {
+    url += `&sedeIds=${sedeId}`;
+  }
+  if (semestreId) {
+    url += `&semestreId=${semestreId}`;
+  }
+  if (vencido !== undefined) {
+    url += `&vencido=${vencido}`;
+  }
+
+  const response = await fetch(url, {
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,

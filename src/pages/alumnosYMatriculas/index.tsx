@@ -37,7 +37,6 @@ interface Option {
   label: string;
 }
 export default function AlumnosYMatriculas() {
-const [alumnosData, setAlumnosData] = useState([]); // Initialize with an empty array
 
   // const fetchAlumnos = async () => {
   //   try {
@@ -55,6 +54,11 @@ const [alumnosData, setAlumnosData] = useState([]); // Initialize with an empty 
 
   const { fetchMatricula } = useContext(matriculaContext);
   const methods = useForm()
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    console.log('user', user)
+    methods.setValue('user', user.id);
+  }, [methods]);
   const [userOptions, setUserOptions] = useState<Option[]>([]);
   useEffect(() => {
     const fetchUser = async () => {
@@ -70,7 +74,14 @@ const [alumnosData, setAlumnosData] = useState([]); // Initialize with an empty 
   }, []);
   const [alumnoOptions, setAlumnoOptions] = useState<Option[]>([]);
   const [semestreOptions, setSemestreOptions] = useState<Option[]>([]);
-
+  const fetchAlumnosCreados = async () => {
+    const response = await getAlumnos();
+    const options = response.content.map(alumno => ({
+      value: alumno.id,
+      label: `${alumno.apellidos}, ${alumno.nombres} `,
+    }));
+    setAlumnoOptions(options);
+  };
   useEffect(() => {
     const fetchAlumnos = async () => {
       const response = await getAlumnos();
@@ -124,7 +135,10 @@ const [alumnosData, setAlumnosData] = useState([]); // Initialize with an empty 
   const { fetchAlumnos } = useContext(alumnosContext);
   const [searchTerm, setSearchTerm] = useState('');
   const methodsAlumnos = useForm()
-
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    methodsAlumnos.setValue('sede', user.sede.id);
+  }, [methodsAlumnos]);
   const [sedeOptions, setSedeOptions] = useState<Option[]>([]);
   useEffect(() => {
     const fetchSedes = async () => {
@@ -158,12 +172,12 @@ const [alumnosData, setAlumnosData] = useState([]); // Initialize with an empty 
         estado: alumno.estado,
       }
       await createAlumno(addAlumno)
+      await fetchAlumnosCreados();
       toast.toast({
         variant: 'success',
         title: 'Éxito',
         description: 'El alumno se ha añadido correctamente.'
       })
-      fetchAlumnos()
       methodsAlumnos.reset()
     } catch (error) {
       toast.toast({
@@ -229,14 +243,14 @@ const [alumnosData, setAlumnosData] = useState([]); // Initialize with an empty 
                         <Form {...methodsAlumnos}>
                           <div className="flex flex-col space-y-4 w-1/2">
 
-                            <FormField name="codigo" render={({ field }) => (
-                              <>
-                                <FormLabel>Codigo</FormLabel>
-                                <FormControl>
-                                  <Input {...field} placeholder="Ingresa el codigo" />
-                                </FormControl>
-                              </>
-                            )} />
+                            {/*<FormField name="codigo" render={({ field }) => (*/}
+                            {/*  <>*/}
+                            {/*    <FormLabel>Codigo</FormLabel>*/}
+                            {/*    <FormControl>*/}
+                            {/*      <Input {...field} placeholder="Ingresa el codigo" />*/}
+                            {/*    </FormControl>*/}
+                            {/*  </>*/}
+                            {/*)} />*/}
                             <FormField name="apellidos" render={({ field }) => (
                               <>
                                 <FormLabel>Apellidos</FormLabel>
@@ -253,74 +267,74 @@ const [alumnosData, setAlumnosData] = useState([]); // Initialize with an empty 
                                 </FormControl>
                               </>
                             )} />
-                            <FormField name="sexo" render={({ field }) => (
-                              <>
-                                <FormLabel>sexo</FormLabel>
-                                <FormControl>
-                                  <Popover>
-                                    <PopoverTrigger asChild>
-                                      <Button
-                                        variant="outline"
-                                        role="combobox"
-                                        className={cn(
-                                          'w-auto justify-between',
+                            {/*<FormField name="sexo" render={({ field }) => (*/}
+                            {/*  <>*/}
+                            {/*    <FormLabel>sexo</FormLabel>*/}
+                            {/*    <FormControl>*/}
+                            {/*      <Popover>*/}
+                            {/*        <PopoverTrigger asChild>*/}
+                            {/*          <Button*/}
+                            {/*            variant="outline"*/}
+                            {/*            role="combobox"*/}
+                            {/*            className={cn(*/}
+                            {/*              'w-auto justify-between',*/}
 
-                                          !field.value && 'text-muted-foreground',
-                                        )}
-                                      >
-                                        {field.value
-                                          ? sexos.find(
-                                            (option) => option.value === field.value,
-                                          )?.label
-                                          : 'Select usuario'}
-                                        <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                      </Button>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-auto p-0">
-                                      <Command>
-                                        <CommandInput placeholder="Search..." onValueChange={setSearchTerm} />
-                                        <CommandEmpty>No options found.</CommandEmpty>
-                                        <CommandGroup>
-                                          {sexos.map((option) => (
-                                            <CommandItem
-                                              value={option.label}
-                                              key={option.value}
-                                              onSelect={() => {
-                                                methods.setValue('sexo', option.value)
-                                              }}
-                                            >
-                                              <CheckIcon
-                                                className={cn(
-                                                  'mr-2 h-4 w-4',
-                                                  option.value === field.value
-                                                    ? 'opacity-100'
-                                                    : 'opacity-0',
-                                                )}
-                                              />
-                                              {option.label}
-                                            </CommandItem>
-                                          ))}
-                                        </CommandGroup>
-                                      </Command>
-                                    </PopoverContent>
-                                  </Popover>
-                                </FormControl>
-                              </>
-                            )} />
-                            <FormField name="fechaNacimiento" render={({ field }) => (
-                              <>
-                                <FormLabel>Fecha nacimiento</FormLabel>
-                                <FormControl>
-                                  <MaskedInput
-                                    mask={[/\d/, /\d/, /\d/, /\d/, '-', /\d/, /\d/, '-', /\d/, /\d/]}
-                                    guide={false}
-                                    placeholder="yyyy-mm-dd"
-                                    {...field}
-                                    render={(ref, props) => <Input ref={ref} {...props} />}
-                                  />
-                                </FormControl>
-                              </>
-                            )} />
+                            {/*              !field.value && 'text-muted-foreground',*/}
+                            {/*            )}*/}
+                            {/*          >*/}
+                            {/*            {field.value*/}
+                            {/*              ? sexos.find(*/}
+                            {/*                (option) => option.value === field.value,*/}
+                            {/*              )?.label*/}
+                            {/*              : 'Select usuario'}*/}
+                            {/*            <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />*/}
+                            {/*          </Button>*/}
+                            {/*        </PopoverTrigger>*/}
+                            {/*        <PopoverContent className="w-auto p-0">*/}
+                            {/*          <Command>*/}
+                            {/*            <CommandInput placeholder="Search..." onValueChange={setSearchTerm} />*/}
+                            {/*            <CommandEmpty>No options found.</CommandEmpty>*/}
+                            {/*            <CommandGroup>*/}
+                            {/*              {sexos.map((option) => (*/}
+                            {/*                <CommandItem*/}
+                            {/*                  value={option.label}*/}
+                            {/*                  key={option.value}*/}
+                            {/*                  onSelect={() => {*/}
+                            {/*                    methods.setValue('sexo', option.value)*/}
+                            {/*                  }}*/}
+                            {/*                >*/}
+                            {/*                  <CheckIcon*/}
+                            {/*                    className={cn(*/}
+                            {/*                      'mr-2 h-4 w-4',*/}
+                            {/*                      option.value === field.value*/}
+                            {/*                        ? 'opacity-100'*/}
+                            {/*                        : 'opacity-0',*/}
+                            {/*                    )}*/}
+                            {/*                  />*/}
+                            {/*                  {option.label}*/}
+                            {/*                </CommandItem>*/}
+                            {/*              ))}*/}
+                            {/*            </CommandGroup>*/}
+                            {/*          </Command>*/}
+                            {/*        </PopoverContent>*/}
+                            {/*      </Popover>*/}
+                            {/*    </FormControl>*/}
+                            {/*  </>*/}
+                            {/*)} />*/}
+                            {/*<FormField name="fechaNacimiento" render={({ field }) => (*/}
+                            {/*  <>*/}
+                            {/*    <FormLabel>Fecha nacimiento</FormLabel>*/}
+                            {/*    <FormControl>*/}
+                            {/*      <MaskedInput*/}
+                            {/*        mask={[/\d/, /\d/, /\d/, /\d/, '-', /\d/, /\d/, '-', /\d/, /\d/]}*/}
+                            {/*        guide={false}*/}
+                            {/*        placeholder="yyyy-mm-dd"*/}
+                            {/*        {...field}*/}
+                            {/*        render={(ref, props) => <Input ref={ref} {...props} />}*/}
+                            {/*      />*/}
+                            {/*    </FormControl>*/}
+                            {/*  </>*/}
+                            {/*)} />*/}
                             <FormField name="celular" render={({ field }) => (
                               <>
                                 <FormLabel>Celular</FormLabel>
@@ -329,14 +343,14 @@ const [alumnosData, setAlumnosData] = useState([]); // Initialize with an empty 
                                 </FormControl>
                               </>
                             )} />
-                            <FormField name="telefono" render={({ field }) => (
-                              <>
-                                <FormLabel>Telefono</FormLabel>
-                                <FormControl>
-                                  <Input {...field} placeholder="Ingresa el telefono" />
-                                </FormControl>
-                              </>
-                            )} />
+                            {/*<FormField name="telefono" render={({ field }) => (*/}
+                            {/*  <>*/}
+                            {/*    <FormLabel>Telefono</FormLabel>*/}
+                            {/*    <FormControl>*/}
+                            {/*      <Input {...field} placeholder="Ingresa el telefono" />*/}
+                            {/*    </FormControl>*/}
+                            {/*  </>*/}
+                            {/*)} />*/}
                           </div>
                           <div className="flex flex-col space-y-4 w-1/2">
                             <FormField name="dni" render={({ field }) => (
@@ -347,38 +361,38 @@ const [alumnosData, setAlumnosData] = useState([]); // Initialize with an empty 
                                 </FormControl>
                               </>
                             )} />
-                            <FormField name="direccion" render={({ field }) => (
-                              <>
-                                <FormLabel>Direccion</FormLabel>
-                                <FormControl>
-                                  <Input {...field} placeholder="Ingresa la direccion" />
-                                </FormControl>
-                              </>
-                            )} />
-                            <FormField name="distrito" render={({ field }) => (
-                              <>
-                                <FormLabel>Distrito</FormLabel>
-                                <FormControl>
-                                  <Input {...field} placeholder="Ingresa el distrito" />
-                                </FormControl>
-                              </>
-                            )} />
-                            <FormField name="provincia" render={({ field }) => (
-                              <>
-                                <FormLabel>Provincia</FormLabel>
-                                <FormControl>
-                                  <Input {...field} placeholder="Ingresa la fecha del último pago" />
-                                </FormControl>
-                              </>
-                            )} />
-                            <FormField name="departamento" rules={{ required: true }} render={({ field }) => (
-                              <>
-                                <FormLabel>Departamento</FormLabel>
-                                <FormControl>
-                                  <Input {...field} placeholder="Ingresa el departamento" />
-                                </FormControl>
-                              </>
-                            )} />
+                            {/*<FormField name="direccion" render={({ field }) => (*/}
+                            {/*  <>*/}
+                            {/*    <FormLabel>Direccion</FormLabel>*/}
+                            {/*    <FormControl>*/}
+                            {/*      <Input {...field} placeholder="Ingresa la direccion" />*/}
+                            {/*    </FormControl>*/}
+                            {/*  </>*/}
+                            {/*)} />*/}
+                            {/*<FormField name="distrito" render={({ field }) => (*/}
+                            {/*  <>*/}
+                            {/*    <FormLabel>Distrito</FormLabel>*/}
+                            {/*    <FormControl>*/}
+                            {/*      <Input {...field} placeholder="Ingresa el distrito" />*/}
+                            {/*    </FormControl>*/}
+                            {/*  </>*/}
+                            {/*)} />*/}
+                            {/*<FormField name="provincia" render={({ field }) => (*/}
+                            {/*  <>*/}
+                            {/*    <FormLabel>Provincia</FormLabel>*/}
+                            {/*    <FormControl>*/}
+                            {/*      <Input {...field} placeholder="Ingresa la fecha del último pago" />*/}
+                            {/*    </FormControl>*/}
+                            {/*  </>*/}
+                            {/*)} />*/}
+                            {/*<FormField name="departamento" rules={{ required: true }} render={({ field }) => (*/}
+                            {/*  <>*/}
+                            {/*    <FormLabel>Departamento</FormLabel>*/}
+                            {/*    <FormControl>*/}
+                            {/*      <Input {...field} placeholder="Ingresa el departamento" />*/}
+                            {/*    </FormControl>*/}
+                            {/*  </>*/}
+                            {/*)} />*/}
                             <FormField name="sede" render={({ field }) => (
                               <>
                                 <FormLabel>Sede</FormLabel>
@@ -397,7 +411,7 @@ const [alumnosData, setAlumnosData] = useState([]); // Initialize with an empty 
                                           ? sedeOptions.find(
                                             (option) => option.value === field.value,
                                           )?.label
-                                          : 'Select alumno'}
+                                          : 'Seleciona la sede'}
                                         <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                       </Button>
                                     </PopoverTrigger>
@@ -411,7 +425,7 @@ const [alumnosData, setAlumnosData] = useState([]); // Initialize with an empty 
                                               value={option.label}
                                               key={option.value}
                                               onSelect={() => {
-                                                methods.setValue('sede', option.value)
+                                                methodsAlumnos.setValue('sede', option.value)
                                               }}
                                             >
                                               <CheckIcon
@@ -432,60 +446,60 @@ const [alumnosData, setAlumnosData] = useState([]); // Initialize with an empty 
                                 </FormControl>
                               </>
                             )} />
-                            <FormField name="estado" render={({ field }) => (
-                              <>
-                                <FormLabel>Estado</FormLabel>
-                                <FormControl>
-                                  <Popover>
-                                    <PopoverTrigger asChild>
-                                      <Button
-                                        variant="outline"
-                                        role="combobox"
-                                        className={cn(
-                                          'w-auto justify-between',
+                            {/*<FormField name="estado" render={({ field }) => (*/}
+                            {/*  <>*/}
+                            {/*    <FormLabel>Estado</FormLabel>*/}
+                            {/*    <FormControl>*/}
+                            {/*      <Popover>*/}
+                            {/*        <PopoverTrigger asChild>*/}
+                            {/*          <Button*/}
+                            {/*            variant="outline"*/}
+                            {/*            role="combobox"*/}
+                            {/*            className={cn(*/}
+                            {/*              'w-auto justify-between',*/}
 
-                                          !field.value && 'text-muted-foreground',
-                                        )}
-                                      >
-                                        {field.value
-                                          ? estadoAlumnos.find(
-                                            (option) => option.value === field.value,
-                                          )?.label
-                                          : 'Select estado'}
-                                        <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                      </Button>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-auto p-0">
-                                      <Command>
-                                        <CommandInput placeholder="Search..." onValueChange={setSearchTerm} />
-                                        <CommandEmpty>No options found.</CommandEmpty>
-                                        <CommandGroup>
-                                          {estadoAlumnos.map((option) => (
-                                            <CommandItem
-                                              value={option.label}
-                                              key={option.value}
-                                              onSelect={() => {
-                                                methods.setValue('estado', option.value)
-                                              }}
-                                            >
-                                              <CheckIcon
-                                                className={cn(
-                                                  'mr-2 h-4 w-4',
-                                                  option.value === field.value
-                                                    ? 'opacity-100'
-                                                    : 'opacity-0',
-                                                )}
-                                              />
-                                              {option.label}
-                                            </CommandItem>
-                                          ))}
-                                        </CommandGroup>
-                                      </Command>
-                                    </PopoverContent>
-                                  </Popover>
-                                </FormControl>
-                              </>
-                            )} />
+                            {/*              !field.value && 'text-muted-foreground',*/}
+                            {/*            )}*/}
+                            {/*          >*/}
+                            {/*            {field.value*/}
+                            {/*              ? estadoAlumnos.find(*/}
+                            {/*                (option) => option.value === field.value,*/}
+                            {/*              )?.label*/}
+                            {/*              : 'Select estado'}*/}
+                            {/*            <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />*/}
+                            {/*          </Button>*/}
+                            {/*        </PopoverTrigger>*/}
+                            {/*        <PopoverContent className="w-auto p-0">*/}
+                            {/*          <Command>*/}
+                            {/*            <CommandInput placeholder="Search..." onValueChange={setSearchTerm} />*/}
+                            {/*            <CommandEmpty>No options found.</CommandEmpty>*/}
+                            {/*            <CommandGroup>*/}
+                            {/*              {estadoAlumnos.map((option) => (*/}
+                            {/*                <CommandItem*/}
+                            {/*                  value={option.label}*/}
+                            {/*                  key={option.value}*/}
+                            {/*                  onSelect={() => {*/}
+                            {/*                    methods.setValue('estado', option.value)*/}
+                            {/*                  }}*/}
+                            {/*                >*/}
+                            {/*                  <CheckIcon*/}
+                            {/*                    className={cn(*/}
+                            {/*                      'mr-2 h-4 w-4',*/}
+                            {/*                      option.value === field.value*/}
+                            {/*                        ? 'opacity-100'*/}
+                            {/*                        : 'opacity-0',*/}
+                            {/*                    )}*/}
+                            {/*                  />*/}
+                            {/*                  {option.label}*/}
+                            {/*                </CommandItem>*/}
+                            {/*              ))}*/}
+                            {/*            </CommandGroup>*/}
+                            {/*          </Command>*/}
+                            {/*        </PopoverContent>*/}
+                            {/*      </Popover>*/}
+                            {/*    </FormControl>*/}
+                            {/*  </>*/}
+                            {/*)} />*/}
                           </div>
                         </Form>
                       </div>
@@ -533,7 +547,7 @@ const [alumnosData, setAlumnosData] = useState([]); // Initialize with an empty 
                                     <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                   </Button>
                                 </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0">
+                                <PopoverContent className="w-auto h-60 p-0">
                                   <Command>
                                     <CommandInput placeholder="Search..." onValueChange={setSearchTerm} />
                                     <CommandEmpty>No options found.</CommandEmpty>
